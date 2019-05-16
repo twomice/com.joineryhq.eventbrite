@@ -161,3 +161,57 @@ function eventbrite_civicrm_navigationMenu(&$menu) {
   ));
   _eventbrite_civix_navigationMenu($menu);
 } // */
+
+
+/**
+ * For an array of menu items, recursively get the value of the greatest navID
+ * attribute.
+ * @param <type> $menu
+ * @param <type> $max_navID
+ */
+function _eventbrite_get_max_navID(&$menu, &$max_navID = NULL) {
+  foreach ($menu as $id => $item) {
+    if (!empty($item['attributes']['navID'])) {
+      $max_navID = max($max_navID, $item['attributes']['navID']);
+    }
+    if (!empty($item['child'])) {
+      _eventbrite_get_max_navID($item['child'], $max_navID);
+    }
+  }
+}
+
+/**
+ * Implements hook_civicrm_navigationMenu().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
+ */
+function eventbrite_civicrm_navigationMenu(&$menu) {
+  _eventbrite_get_max_navID($menu, $max_navID);
+  _eventbrite_civix_insert_navigation_menu($menu, 'Administer/CiviEvent', array(
+    'label' => E::ts('Eventbrite Integration'),
+    'name' => 'Eventbrite Integration',
+    'url' => 'civicrm/admin/eventbrite/settings',
+    'permission' => 'administer CiviCRM',
+    'operator' => 'AND',
+    'separator' => NULL,
+    'navID' => ++$max_navID,
+  ));
+  _eventbrite_civix_navigationMenu($menu);
+}
+
+/**
+ * CiviCRM API wrapper. Wraps with try/catch, redirects errors to log, saves
+ * typing.
+ */
+function _eventbrite_civicrmapi($entity, $action, $params, $silence_errors = TRUE) {
+  try {
+    $result = civicrm_api3($entity, $action, $params);
+  } catch (CiviCRM_API3_Exception $e) {
+    _eventbrite_log_api_error($e, $entity, $action, $params);
+    if (!$silence_errors) {
+      throw $e;
+    }
+  }
+
+  return $result;
+}
