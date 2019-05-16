@@ -1,26 +1,26 @@
 <?xml version="1.0"?>
 <extension key="com.joineryhq.eventbrite" type="module">
   <file>eventbrite</file>
-  <name>FIXME</name>
-  <description>FIXME</description>
+  <name>Eventbrite Integration</name>
+  <description>Provides synchronization to CiviCRM for participants and payments registered through Eventbrite.</description>
   <license>GPL-3.0</license>
   <maintainer>
     <author>Allen Shaw</author>
     <email>allen@JoineryHQ.com</email>
   </maintainer>
   <urls>
-    <url desc="Main Extension Page">http://FIXME</url>
-    <url desc="Documentation">http://FIXME</url>
-    <url desc="Support">http://FIXME</url>
+    <url desc="Main Extension Page">https://github.com/twomice/com.joineryhq.eventbrite/</url>
+    <url desc="Documentation">https://twomice.github.io/com.joineryhq.eventbrite/</url>
+    <url desc="Support">https://github.com/twomice/com.joineryhq.eventbrite/issues</url>
     <url desc="Licensing">http://www.gnu.org/licenses/gpl-3.0.html</url>
   </urls>
   <releaseDate>2019-05-15</releaseDate>
   <version>1.0</version>
   <develStage>alpha</develStage>
   <compatibility>
-    <ver>4.7</ver>
+    <ver>5.0</ver>
   </compatibility>
-  <comments>This is a new, undeveloped module</comments>
+  <comments>Developed by Joinery for Joseph Lacey and GIA.</comments>
   <civix>
     <namespace>CRM/Eventbrite</namespace>
   </civix>
