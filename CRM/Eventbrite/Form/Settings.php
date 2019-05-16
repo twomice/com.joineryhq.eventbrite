@@ -172,9 +172,12 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
    * @see CRM_Core_Form::setDefaultValues()
    */
   function setDefaultValues() {
-    $result = _eventbrite_civicrmapi('setting', 'get', array('return' => array_keys($this->_settings)));
-    $domainID = CRM_Core_Config::domainID();
-    $ret = CRM_Utils_Array::value($domainID, $result['values']);
+    static $ret;
+    if (!isset($ret)) {
+      $result = _eventbrite_civicrmapi('setting', 'get', array('return' => array_keys($this->_settings)));
+      $domainID = CRM_Core_Config::domainID();
+      $ret = CRM_Utils_Array::value($domainID, $result['values']);
+    }
     return $ret;
   }
 
@@ -237,7 +240,15 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
   private function _validateTokenOnFormLoad() {
     if (!$this->_flagSubmitted) {
       if ($token = CRM_Utils_Array::value('eventbrite_api_token', $this->setDefaultValues())) {
-        CRM_Core_Session::setStatus("TODO: VALIDATE TOKEN, WHICH IS $token", E::ts('Eventbrite token rejected'), 'error');
+        $eb = CRM_Eventbrite_EvenbriteApi::singleton($token);
+        $result = $eb->request('/users/me/');
+        if ($error = CRM_Utils_Array::value('error', $result)) {
+          $error_message = CRM_Utils_Array::value('status_code', $result);
+          $error_message .= ': '. $error;
+          $error_message .= ': '. CRM_Utils_Array::value('error_description', $result);
+          $msg = E::ts('Eventbrite said: <em>%1</em>', array('1' => $error_message));
+          CRM_Core_Session::setStatus($msg, E::ts('Eventbrite token'), 'error');
+        }
       }
     }
   }
