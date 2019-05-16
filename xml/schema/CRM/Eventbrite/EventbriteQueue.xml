@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Eventbrite</base>
+  <class>EventbriteQueue</class>
+  <name>civicrm_eventbrite_queue</name>
+  <comment>Queued Eventbrite webhook events</comment>
+  <add>5.0</add>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique EventbriteQueue ID</comment>
+    <add>5.0</add>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+
+  <field>
+    <name>created_date</name>
+    <type>timestamp</type>
+    <comment>When was the queue entry created.</comment>
+    <required>false</required>
+    <export>true</export>
+    <default>NULL</default>
+    <add>5.0</add>
+  </field>
+    
+  <field>
+    <name>message</name>
+    <type>text</type>
+    <comment>Contents of the webhook event notification</comment>
+    <add>5.0</add>
+  </field>
+
+  <field>
+    <name>status_id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Status. See CRM_Eventbrite_BAO_EventbriteQueue::STATUS_ID_*</comment>
+    <add>5.0</add>
+  </field>
+
+</table>

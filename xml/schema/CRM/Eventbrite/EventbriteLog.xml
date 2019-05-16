@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Eventbrite</base>
+  <class>EventbriteLog</class>
+  <name>civicrm_eventbrite_log</name>
+  <comment>Log messages for Eventbrite Integration</comment>
+  <add>5.0</add>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique EventbriteLog ID</comment>
+    <add>5.0</add>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+
+  <field>
+    <name>created_date</name>
+    <type>timestamp</type>
+    <comment>When was the log entry created.</comment>
+    <required>false</required>
+    <export>true</export>
+    <default>NULL</default>
+    <add>5.0</add>
+  </field>
+  
+  <field>
+    <name>message_type_id</name>
+    <type>int unsigned</type>
+    <comment>Message type. See CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_*</comment>
+    <add>5.0</add>
+  </field>
+  
+  <field>
+    <name>message</name>
+    <type>text</type>
+    <comment>Logged message</comment>
+    <add>5.0</add>
+  </field>
+
+
+</table>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Eventbrite</base>
+  <class>EventbriteLink</class>
+  <name>civicrm_eventbrite_link</name>
+  <comment>Links between CiviCRM entities and Eventbrite entities</comment>
+  <add>5.0</add>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique EventbriteLink ID</comment>
+    <add>5.0</add>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>civicrm_entity_type</name>
+    <required>true</required>
+    <type>varchar</type>
+    <length>255</length>
+    <comment>Type of CiviCRM entity</comment>
+    <add>5.0</add>
+  </field>
+
+  <field>
+    <name>civicrm_entity_id</name>
+    <required>true</required>
+    <type>int unsigned</type>
+    <comment>ID of CiviCRM entity</comment>
+    <add>5.0</add>
+  </field>
+
+  <field>
+    <name>eb_entity_type</name>
+    <required>true</required>
+    <type>varchar</type>
+    <length>255</length>
+    <comment>Type of Eventbrite entity</comment>
+    <add>5.0</add>
+  </field>
+
+  <field>
+    <name>eb_entity_id</name>
+    <required>true</required>
+    <type>int unsigned</type>
+    <comment>ID of Eventbrite entity</comment>
+    <add>5.0</add>
+  </field>
+
+</table>
