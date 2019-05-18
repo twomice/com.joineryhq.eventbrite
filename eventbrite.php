@@ -200,6 +200,18 @@ function eventbrite_civicrm_navigationMenu(&$menu) {
 }
 
 /**
+ * Log CiviCRM API errors to CiviCRM log.
+ */
+function _eventbrite_log_api_error(CiviCRM_API3_Exception $e, $entity, $action, $params) {
+  $message = "CiviCRM API Error '{$entity}.{$action}': ". $e->getMessage() .'; ';
+  $message .= "API parameters when this error happened: ". json_encode($params) .'; ';
+  $bt = debug_backtrace();
+  $error_location = "{$bt[1]['file']}::{$bt[1]['line']}";
+  $message .= "Error API called from: $error_location";
+  CRM_Core_Error::debug_log_message($message);
+}
+
+/**
  * CiviCRM API wrapper. Wraps with try/catch, redirects errors to log, saves
  * typing.
  */

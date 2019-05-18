@@ -107,7 +107,7 @@ CREATE TABLE `civicrm_eventbrite_log` (
 
      `id` int unsigned NOT NULL AUTO_INCREMENT  COMMENT 'Unique EventbriteLog ID',
      `created_date` timestamp NULL  DEFAULT NULL COMMENT 'When was the log entry created.',
-     `message_type_id` int unsigned    COMMENT 'Message type. See CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_*',
+     `message_type_id` int unsigned    COMMENT 'Message type. See CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_*',
      `message` text    COMMENT 'Logged message' 
 ,
         PRIMARY KEY (`id`)
@@ -127,9 +127,9 @@ CREATE TABLE `civicrm_eventbrite_queue` (
 
 
      `id` int unsigned NOT NULL AUTO_INCREMENT  COMMENT 'Unique EventbriteQueue ID',
-     `created_date` timestamp NULL  DEFAULT NULL COMMENT 'When was the queue entry created.',
+     `created_date` timestamp NULL  DEFAULT CURRENT_TIMESTAMP COMMENT 'When was the queue entry created.',
      `message` text    COMMENT 'Contents of the webhook event notification',
-     `status_id` int unsigned NOT NULL   COMMENT 'Status. See CRM_Eventbrite_BAO_EventbriteQueue::STATUS_ID_*' 
+     `status_id` int unsigned NOT NULL  DEFAULT 1 COMMENT 'Status. See CRM_Eventbrite_BAO_EventbriteQueue::STATUS_ID_*' 
 ,
         PRIMARY KEY (`id`)
  

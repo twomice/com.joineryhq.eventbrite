@@ -27,13 +27,14 @@
     <comment>When was the log entry created.</comment>
     <required>false</required>
     <export>true</export>
-    <default>NULL</default>
+    <default>CURRENT_TIMESTAMP</default>
     <add>5.0</add>
   </field>
   
   <field>
     <name>message_type_id</name>
     <type>int unsigned</type>
+    <required>true</required>
     <comment>Message type. See CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_*</comment>
     <add>5.0</add>
   </field>
@@ -41,6 +42,7 @@
   <field>
     <name>message</name>
     <type>text</type>
+    <required>true</required>
     <comment>Logged message</comment>
     <add>5.0</add>
   </field>

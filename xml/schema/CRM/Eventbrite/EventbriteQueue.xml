@@ -27,7 +27,7 @@
     <comment>When was the queue entry created.</comment>
     <required>false</required>
     <export>true</export>
-    <default>NULL</default>
+    <default>CURRENT_TIMESTAMP</default>
     <add>5.0</add>
   </field>
     
@@ -42,6 +42,7 @@
     <name>status_id</name>
     <type>int unsigned</type>
     <required>true</required>
+    <default>1</default>
     <comment>Status. See CRM_Eventbrite_BAO_EventbriteQueue::STATUS_ID_*</comment>
     <add>5.0</add>
   </field>
