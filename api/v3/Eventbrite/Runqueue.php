@@ -34,31 +34,36 @@ function civicrm_api3_eventbrite_Runqueue($params) {
   );
   $result = _eventbrite_civicrmapi('EventbriteQueue', 'get', $apiParams);
 
-  $processed = $errors = array();
+  $processedRows = $errorRows = $processedEntities = $duplicateRows = array();
   foreach ($result['values'] as $value) {
-    $valueProcessed = FALSE;
     try {
-      $processor = new CRM_Eventbrite_WebhookProcessor(CRM_Utils_Array::value('message', $value));
-      $processor->process();
-      $processed[] = $value['id'];
-      $valueProcessed = TRUE;
-    } catch (CiviCRM_API3_Exception $e) {
-      $errors[$value['id']] = $e->getMessage();
-    }
-
-    if ($valueProcessed) {
+      $processor = CRM_Eventbrite_WebhookProcessorFactory::create(CRM_Utils_Array::value('message', $value));
+      if ($processor !== FALSE) {
+        $entityIndentifier = $processor->getEntityIdentifier();
+        if (in_array($entityIndentifier, $processedEntities)) {
+          $duplicateRows[] = $value['id'];
+        }
+        else {
+          $processor->process();
+          $processedRows[] = $value['id'];
+          $processedEntities[] = $entityIndentifier;
+        }
+      }
       $apiParams = array(
         'id' => $value['id'],
         'status_id' => CRM_Eventbrite_BAO_EventbriteQueue::STATUS_ID_PROCESSED,
       );
-      _eventbrite_civicrmapi('EventbriteQueue', 'create', $apiParams);
+//      _eventbrite_civicrmapi('EventbriteQueue', 'create', $apiParams);
+    } catch (CiviCRM_API3_Exception $e) {
+      $errorRows[$value['id']] = $e->getMessage();
     }
   }
 
   $returnValues = array(
     array(
-      'Processed' => $processed,
-      'Errors' => $errors,
+      'Processed' => $processedRows,
+      'Errors' => $errorRows,
+      'Duplicates' => $duplicateRows,
     )
   );
   return civicrm_api3_create_success($returnValues, $params, 'Eventbrite', 'runqueue');
