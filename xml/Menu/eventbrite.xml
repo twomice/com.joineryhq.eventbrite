@@ -12,4 +12,16 @@
     <title>Eventbrite integration: Settings</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/admin/eventbrite/manage/events</path>
+    <page_callback>CRM_Eventbrite_Page_Manage_Events</page_callback>
+    <title>Eventbrite integration: Events</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/admin/eventbrite/manage/event</path>
+    <page_callback>CRM_Eventbrite_Form_Manage_Event</page_callback>
+    <title>Eventbrite integration: Events</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
 </menu>

@@ -146,24 +146,6 @@ function eventbrite_civicrm_preProcess($formName, &$form) {
 } // */
 
 /**
- * Implements hook_civicrm_navigationMenu().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
- *
-function eventbrite_civicrm_navigationMenu(&$menu) {
-  _eventbrite_civix_insert_navigation_menu($menu, 'Mailings', array(
-    'label' => E::ts('New subliminal message'),
-    'name' => 'mailing_subliminal_message',
-    'url' => 'civicrm/mailing/subliminal',
-    'permission' => 'access CiviMail',
-    'operator' => 'OR',
-    'separator' => 0,
-  ));
-  _eventbrite_civix_navigationMenu($menu);
-} // */
-
-
-/**
  * For an array of menu items, recursively get the value of the greatest navID
  * attribute.
  * @param <type> $menu
@@ -190,7 +172,25 @@ function eventbrite_civicrm_navigationMenu(&$menu) {
   _eventbrite_civix_insert_navigation_menu($menu, 'Administer/CiviEvent', array(
     'label' => E::ts('Eventbrite Integration'),
     'name' => 'Eventbrite Integration',
+    'url' => NULL,
+    'permission' => 'administer CiviCRM',
+    'operator' => 'AND',
+    'separator' => NULL,
+    'navID' => ++$max_navID,
+  ));
+  _eventbrite_civix_insert_navigation_menu($menu, 'Administer/CiviEvent/Eventbrite Integration', array(
+    'label' => E::ts('Settings'),
+    'name' => 'Settings',
     'url' => 'civicrm/admin/eventbrite/settings',
+    'permission' => 'administer CiviCRM',
+    'operator' => 'AND',
+    'separator' => NULL,
+    'navID' => ++$max_navID,
+  ));
+  _eventbrite_civix_insert_navigation_menu($menu, 'Administer/CiviEvent/Eventbrite Integration', array(
+    'label' => E::ts('Events'),
+    'name' => 'Events',
+    'url' => 'civicrm/admin/eventbrite/manage/events?action=browse&reset=1',
     'permission' => 'administer CiviCRM',
     'operator' => 'AND',
     'separator' => NULL,

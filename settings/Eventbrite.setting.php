@@ -20,4 +20,21 @@ return array(
 //    ),
     'quick_form_type' => 'Element',
   ),
+  'eventbrite_api_organization_id' => array(
+    'group_name' => 'Eventbrite Settings',
+    'group' => 'eventbrite',
+    'name' => 'eventbrite_api_organization_id',
+    'type' => 'String',
+    'add' => '5.0',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => E::ts('Eventbrite system ID for the Eventbrite organization to which all linked events will belong.'),
+    'title' =>  E::ts('Eventbrite API Organization ID'),
+//    'help_text' => '',
+    'html_type' => 'Text',
+//    'html_attributes' => array(
+//      'size' => 10,
+//    ),
+//    'quick_form_type' => 'hidden',
+  ),
  );

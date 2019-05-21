@@ -49,7 +49,8 @@
   <field>
     <name>eb_entity_id</name>
     <required>true</required>
-    <type>int unsigned</type>
+    <type>varchar</type>
+    <length>255</length>
     <comment>ID of Eventbrite entity</comment>
     <add>5.0</add>
   </field>

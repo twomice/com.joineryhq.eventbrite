@@ -13,8 +13,15 @@ class CRM_Eventbrite_EvenbriteApi {
    * Constructor.
    * @param type $token Eventbrite private OAuth token.
    */
-  private function __construct($token) {
-    $this->token = $token;
+  private function __construct($token = NULL) {
+    if (isset($token)) {
+      $this->token = $token;
+    }
+    else {
+      $this->token = _eventbrite_civicrmapi('Setting', 'getvalue', [
+        'name' => "eventbrite_api_token",
+      ]);
+    }
   }
 
   /**
@@ -25,7 +32,7 @@ class CRM_Eventbrite_EvenbriteApi {
    * @param type $token
    * @return type
    */
-  public function singleton($token) {
+  public static function singleton($token = NULL) {
     if (self::$_singleton === NULL) {
       self::$_singleton = new CRM_Eventbrite_EvenbriteApi($token);
     }
@@ -44,17 +51,21 @@ class CRM_Eventbrite_EvenbriteApi {
    * @return array
    */
   public function request($path, $body = array(), $expand = array(), $method = 'GET') {
-    $content = json_encode($body);
     $options = array(
       'http' => array(
         'method' => $method,
         'header' => "content-type: application/json\r\n",
-        'content' => $content,
         'ignore_errors' => TRUE,
       ),
     );
+    if (
+      $method == 'POST'
+      || $method == 'PUT'
+    ) {
+      $options['content'] = json_encode($body);
+    }
 
-    $path = rtrim($path, '/') . '/';
+    $path = '/' . trim($path, '/') . '/';
     $url = self::EVENTBRITE_APIv3_URL . $path . '?token=' . $this->token;
 
     if (!empty($expand)) {

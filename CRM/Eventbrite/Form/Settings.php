@@ -163,6 +163,16 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
     $unsettings = array_fill_keys(array_keys(array_diff_key($settings, $this->_submittedValues)), NULL);
     _eventbrite_civicrmapi('setting', 'create', $unsettings);
 
+    // Assume the token is only for one Eventbrite organization; fetch and record
+    // that organization ID.
+    $eb = CRM_Eventbrite_EvenbriteApi::singleton();
+    if ($organizations = CRM_Utils_Array::value('organizations', $eb->request('users/me/organizations/'))) {
+      $organizationId = $organizations[0]['id'];
+      _eventbrite_civicrmapi('setting', 'create', array(
+        'eventbrite_api_organization_id' => $organizationId,
+      ));
+    }
+
     CRM_Core_Session::setStatus(" ", ts('Settings saved.'), "success");
   }
 
@@ -174,9 +184,11 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
   function setDefaultValues() {
     static $ret;
     if (!isset($ret)) {
-      $result = _eventbrite_civicrmapi('setting', 'get', array('return' => array_keys($this->_settings)));
-      $domainID = CRM_Core_Config::domainID();
-      $ret = CRM_Utils_Array::value($domainID, $result['values']);
+      $result = _eventbrite_civicrmapi('setting', 'get', array(
+        'return' => array_keys($this->_settings),
+        'sequential' => 1,
+      ));
+      $ret = CRM_Utils_Array::value(0, $result['values']);
     }
     return $ret;
   }
@@ -240,7 +252,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
   private function _validateTokenOnFormLoad() {
     if (!$this->_flagSubmitted) {
       if ($token = CRM_Utils_Array::value('eventbrite_api_token', $this->setDefaultValues())) {
-        $eb = CRM_Eventbrite_EvenbriteApi::singleton($token);
+        $eb = CRM_Eventbrite_EvenbriteApi::singleton();
         $result = $eb->request('/users/me/');
         if ($error = CRM_Utils_Array::value('error', $result)) {
           $error_message = CRM_Utils_Array::value('status_code', $result);
