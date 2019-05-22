@@ -8,11 +8,9 @@
 
   <div class="crm-content-block crm-block">
   {if $rows}
-  {if !($action eq 1 and $action eq 2)}
-      <div class="action-link">
-        {crmButton p="civicrm/admin/eventbrite/manage/event" q="action=add&reset=1" icon="plus-circle"}{ts}Add Event{/ts}{/crmButton}
-      </div>
-  {/if}
+    <div class="action-link">
+      {crmButton p="civicrm/admin/eventbrite/manage/events" q="action=add&reset=1" icon="plus-circle"}{ts}Add Event{/ts}{/crmButton}
+    </div>
 
   <div id="ltype">
 
