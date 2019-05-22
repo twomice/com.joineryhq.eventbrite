@@ -55,4 +55,18 @@
     <add>5.0</add>
   </field>
 
+  <field>
+    <name>parent_id</name>
+    <type>int unsigned</type>
+    <required>false</required>
+    <comment>FK to id</comment>
+    <add>5.0</add>
+  </field>
+  
+  <foreignKey>
+    <name>parent_id</name>
+    <table>civicrm_eventbrite_link</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
 </table>

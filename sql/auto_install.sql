@@ -87,12 +87,13 @@ CREATE TABLE `civicrm_eventbrite_link` (
      `civicrm_entity_type` varchar(255) NOT NULL   COMMENT 'Type of CiviCRM entity',
      `civicrm_entity_id` int unsigned NOT NULL   COMMENT 'ID of CiviCRM entity',
      `eb_entity_type` varchar(255) NOT NULL   COMMENT 'Type of Eventbrite entity',
-     `eb_entity_id` varchar(255) NOT NULL   COMMENT 'ID of Eventbrite entity' 
+     `eb_entity_id` varchar(255) NOT NULL   COMMENT 'ID of Eventbrite entity',
+     `parent_id` int unsigned NULL   COMMENT 'FK to id' 
 ,
         PRIMARY KEY (`id`)
  
  
- 
+,          CONSTRAINT FK_civicrm_eventbrite_link_parent_id FOREIGN KEY (`parent_id`) REFERENCES `civicrm_eventbrite_link`(`id`) ON DELETE CASCADE  
 )    ;
 
 -- /*******************************************************

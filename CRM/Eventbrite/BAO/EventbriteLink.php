@@ -23,4 +23,24 @@ class CRM_Eventbrite_BAO_EventbriteLink extends CRM_Eventbrite_DAO_EventbriteLin
     return $instance;
   } */
 
+  /**
+   * Fetch object based on array of properties.
+   *
+   * @param array $params
+   *   (reference ) an assoc array of name/value pairs.
+   * @param array $defaults
+   *   (reference ) an assoc array to hold the flattened values.
+   *
+   * @return CRM_Core_BAO_OptionGroup
+   */
+  public static function retrieve(&$params, &$defaults) {
+    $eventbriteLink = new CRM_Eventbrite_DAO_EventbriteLink();
+    $eventbriteLink->copyValues($params);
+    if ($eventbriteLink->find(TRUE)) {
+      CRM_Core_DAO::storeValues($eventbriteLink, $defaults);
+      return $eventbriteLink;
+    }
+    return NULL;
+  }
+
 }

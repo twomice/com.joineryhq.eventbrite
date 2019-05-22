@@ -1,29 +1,52 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
  * Description of Events
  *
  * @author as
  */
-use CRM_Textselect_ExtensionUtil as E;
+use CRM_Eventbrite_ExtensionUtil as E;
 
-class CRM_Eventbrite_Form_Manage_Event extends CRM_Core_Form {
+class CRM_Eventbrite_Form_Manage_Event extends CRM_Admin_Form {
+  /**
+   * Explicitly declare the entity api name.
+   */
+  public function getDefaultEntity() {
+    return 'EventbriteLink';
+  }
+
   public function buildQuickForm() {
+    parent::buildQuickForm();
     $descriptions = array();
-    
-    $this->action = CRM_Utils_Array::value('action', $_REQUEST, 'browse');
-    $this->id = CRM_Utils_Array::value('id', $_REQUEST);
-    if ($this->action == 'delete') {
+
+    if ($this->_action & CRM_Core_Action::DELETE) {
       $descriptions['delete_warning'] = ts('Are you sure you want to delete this configuration?');
     }
     else {
       $civicrmEventOptions = $ebEventOptions = array('' => '');
+
+      // Get Eventbrite events for the default Eventbrite organizaiton.
+      $organizationId = _eventbrite_civicrmapi('Setting', 'getvalue', [
+        'name' => "eventbrite_api_organization_id",
+      ]);
+      $eb = CRM_Eventbrite_EvenbriteApi::singleton();
+      if ($ebEvents = CRM_Utils_Array::value('events', $eb->request("/organizations/{$organizationId}/events/"))) {
+        foreach ($ebEvents as $ebEvent) {
+          $ebEventOptions[$ebEvent['id']] = "{$ebEvent['name']['text']} (ID: {$ebEvent['id']})";
+        }
+      }
+      asort($ebEventOptions);
+
+      $this->add(
+        'select', // field type
+        'eb_entity_id', // field name
+        E::ts('Evenbrite Event'), // field label
+        $ebEventOptions, // list of options
+        TRUE // is required
+      );
+
+      // Get all active civicrm events
       $result = _eventbrite_civicrmapi('event', 'get', array(
         'is_active' => 1,
         'is_template' => 0,
@@ -43,41 +66,12 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Core_Form {
         TRUE // is required
       );
 
-      // Get Eventbrite events for the default Eventbrite organizaiton.
-      $organizationId = _eventbrite_civicrmapi('Setting', 'getvalue', [
-        'name' => "eventbrite_api_organization_id",
-      ]);
-      $eb = CRM_Eventbrite_EvenbriteApi::singleton();
-      if ($ebEvents = CRM_Utils_Array::value('events', $eb->request("/organizations/{$organizationId}/events/"))) {
-        foreach ($ebEvents as $ebEvent) {
-          $ebEventOptions[$ebEvent['id']] = "{$ebEvent['name']['text']} (ID: {$ebEvent['id']})";
-        }
-      }
-      
-      $this->add(
-        'select', // field type
-        'eb_entity_id', // field name
-        E::ts('Evenbrite Event'), // field label
-        $ebEventOptions, // list of options
-        TRUE // is required
-      );
-
-      $this->add('hidden', 'action', $this->action);
     }
-    $this->addButtons(array(
-      array(
-        'type' => 'submit',
-        'name' => E::ts('Submit'),
-        'isDefault' => TRUE,
-      ),
-    ));
 
     // export form elements
-    $this->add('hidden', 'action', $this->action);
-    $this->add('hidden', 'id', $this->id);
     $this->assign('elementNames', $this->getRenderableElementNames());
     $this->assign('descriptions', $descriptions);
-    parent::buildQuickForm();
+    $this->assign('id', $this->_id);
   }
 
   /**
@@ -86,9 +80,9 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Core_Form {
    * @see CRM_Core_Form::setDefaultValues()
    */
   public function setDefaultValues() {
-    if ($this->id && ($this->action != 'delete')) {
+    if ($this->_id && (!($this->_action & CRM_Core_Action::DELETE))) {
       $result = _eventbrite_civicrmapi('EventbriteLink', 'getSingle', array(
-        'id' => $this->id,
+        'id' => $this->_id,
         'civicrm_entity_type' => 'event',
       ));
       return $result;
@@ -96,34 +90,27 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Core_Form {
   }
 
   public function postProcess() {
-    $submitted = $this->exportValues();
-      dsm($this, 'this in action ' . $submitted['action']);
-
-    switch ($submitted['action']) {
-      case 'add':
-      case 'update':
-        $apiParams = array(
-          'civicrm_entity_type' => 'event',
-          'civicrm_entity_id' => $submitted['civicrm_entity_id'],
-          'eb_entity_type' => 'event',
-          'eb_entity_id' => $submitted['eb_entity_id'],
-        );
-        if (!empty($this->id)) {
-          $apiParams['id'] = $this->id;
-        }
-        $result = _eventbrite_civicrmapi('EventbriteLink', 'create', $apiParams);
-        break;
-      case 'delete':
-        $result = _eventbrite_civicrmapi('EventbriteLink', 'delete', array(
-          'id' => $this->id,
-//          'civicrm_entity_type' => 'event',
-        ));
-
-        break;
+    if ($this->_action & CRM_Core_Action::DELETE) {
+      $result = _eventbrite_civicrmapi('EventbriteLink', 'delete', array(
+        'id' => $this->_id,
+      ));
     }
+    else {
+      // store the submitted values in an array
+      $submitted = $this->exportValues();
+      $apiParams = array(
+        'civicrm_entity_type' => 'event',
+        'civicrm_entity_id' => $submitted['civicrm_entity_id'],
+        'eb_entity_type' => 'event',
+        'eb_entity_id' => $submitted['eb_entity_id'],
+      );
 
+      if ($this->_action & CRM_Core_Action::UPDATE) {
+        $apiParams['id'] = $this->_id;
+      }
+      $result = _eventbrite_civicrmapi('EventbriteLink', 'create', $apiParams);
+    }
     CRM_Core_Session::setStatus(ts('Settings have been saved.'), ts('Saved'), 'success');
-    parent::postProcess();
   }
 
 
@@ -138,7 +125,6 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Core_Form {
     // items don't have labels.  We'll identify renderable by filtering on
     // the 'label'.
     $elementNames = array();
-    dsm($this->_elements, '$this->_elements');
     foreach ($this->_elements as $element) {
       /** @var HTML_QuickForm_Element $element */
       $label = $element->getLabel();
@@ -146,8 +132,31 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Core_Form {
         $elementNames[] = $element->getName();
       }
     }
-    dsm($elementNames, '$elementNames');
     return $elementNames;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function validate() {
+    $error = parent::validate();
+    if (!($this->_action & CRM_Core_Action::DELETE)) {
+      $submitted = $this->exportValues();
+      $apiParams = array(
+        'civicrm_entity_type' => "event",
+        'eb_entity_type' => "event",
+        'eb_entity_id' => CRM_Utils_Array::value('eb_entity_id', $submitted),
+      );
+      if ($id = $this->_id) {
+        $apiParams['id'] = array('!=' => $id);
+      }
+      if (_eventbrite_civicrmapi('EventbriteLink', 'getcount', $apiParams)) {
+        $errorMessage = E::ts('This Eventbrite event is already linked to a CiviCRM event.');
+        $this->_errors['eb_entity_id'] = $errorMessage;
+      }
+    }
+    return (0 == count($this->_errors));
+
   }
 
 }
