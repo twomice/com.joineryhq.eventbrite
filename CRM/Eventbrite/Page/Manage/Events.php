@@ -32,6 +32,13 @@ class CRM_Eventbrite_Page_Manage_Events extends CRM_Core_Page_Basic {
   public function &links() {
     if (!(self::$_links)) {
       self::$_links = array(
+        CRM_Core_Action::ADVANCED => array(
+          'name' => E::ts('Ticket Types'),
+          'url' => 'civicrm/admin/eventbrite/manage/tickettypes/',
+          'qs' => 'action=browse&pid=%%id%%&reset=1',
+          'title' => E::ts('Edit Event Ticket Types'),
+          'class' => 'no-popup',
+        ),
         CRM_Core_Action::UPDATE => array(
           'name' => E::ts('Edit'),
           'url' => 'civicrm/admin/eventbrite/manage/events/',
