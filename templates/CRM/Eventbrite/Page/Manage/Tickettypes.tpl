@@ -45,7 +45,7 @@
   {/if}
     <div class="action-link">
       {crmButton p="civicrm/admin/eventbrite/manage/tickettypes" q="action=add&reset=1&pid=$pid" icon="plus-circle"}{ts}Add Ticket Type{/ts}{/crmButton}
-      {crmButton p="civicrm/admin" q="reset=1" class="cancel" icon="times"}{ts}Done{/ts}{/crmButton}
+      {crmButton p="civicrm/admin/eventbrite/manage/events" q="reset=1" class="cancel" icon="times"}{ts}Done{/ts}{/crmButton}
     </div>
 
   </div>
