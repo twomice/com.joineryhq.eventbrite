@@ -62,7 +62,7 @@ class CRM_Eventbrite_EvenbriteApi {
       $method == 'POST'
       || $method == 'PUT'
     ) {
-      $options['content'] = json_encode($body);
+      $options['http']['content'] = json_encode($body);
     }
 
     $path = '/' . trim($path, '/') . '/';
