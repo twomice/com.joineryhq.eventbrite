@@ -7,7 +7,7 @@
  */
 use CRM_Eventbrite_ExtensionUtil as E;
 
-class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
+class CRM_Eventbrite_Page_Manage_Fields extends CRM_Core_Page_Basic {
 
   /**
    * @inheritDoc
@@ -24,11 +24,11 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
    * @inheritDoc
    */
   public function getBAOName() {
-    return 'CRM_Eventbrite_BAO_EventbriteLink_Tickettype';
+    return 'CRM_Eventbrite_BAO_EventbriteLink_Field';
   }
 
-  private $ebTicketTypes = array();
-  private $roleLabels = array();
+  private $ebFields = array();
+  private $civicrmFields = array();
   private $ebEventId;
 
   /**
@@ -39,15 +39,15 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
       self::$_links = array(
         CRM_Core_Action::UPDATE => array(
           'name' => E::ts('Edit'),
-          'url' => 'civicrm/admin/eventbrite/manage/tickettypes/',
+          'url' => 'civicrm/admin/eventbrite/manage/fields/',
           'qs' => 'action=update&id=%%id%%&reset=1&pid=' . $this->get('pid'),
-          'title' => E::ts('Edit Ticket Type Configuration'),
+          'title' => E::ts('Edit Question Configuration'),
         ),
         CRM_Core_Action::DELETE => array(
           'name' => E::ts('Delete'),
-          'url' => 'civicrm/admin/eventbrite/manage/tickettypes/',
+          'url' => 'civicrm/admin/eventbrite/manage/fields/',
           'qs' => 'action=delete&id=%%id%%&pid=' . $this->get('pid'),
-          'title' => E::ts('Delete Ticket Type Configuration'),
+          'title' => E::ts('Delete Question Configuration'),
         ),
       );
     }
@@ -70,8 +70,8 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
     CRM_Utils_System::appendBreadCrumb(array($breadCrumb));
     
     $breadCrumb = array(
-      'title' => E::ts('Eventbrite Ticket Types'),
-      'url' => CRM_Utils_System::url('civicrm/admin/eventbrite/manage/tickettypes', 'action=browse&reset=1&pid=' . $this->get('pid')),
+      'title' => E::ts('Eventbrite Questions'),
+      'url' => CRM_Utils_System::url('civicrm/admin/eventbrite/manage/fields', 'action=browse&reset=1&pid=' . $this->get('pid')),
     );
     CRM_Utils_System::appendBreadCrumb(array($breadCrumb));
 
@@ -100,7 +100,7 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
 
     $baoString = $this->getBAOName();
     $object = new $baoString();
-    $where = crm_core_dao::composeQuery('parent_id = %1 AND eb_entity_type = "TicketType"', array(
+    $where = crm_core_dao::composeQuery('parent_id = %1 AND eb_entity_type = "Question"', array(
       '1' => array($this->get('pid'), 'String')
     ));
     $object->whereAdd($where);
@@ -109,6 +109,7 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
 
     // find all objects
     $object->find();
+
     while ($object->fetch()) {
       $row = [];
       CRM_Core_DAO::storeValues($object, $row);
@@ -116,11 +117,11 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
       // populate action links
       $this->action($object, $action = NULL, $row, $links, $permission = NULL);
 
-      $row['eb_ticket_type'] = $this->_getEbTicketType($object->eb_entity_id);
-      $row['civicrm_role'] = $this->_getRoleLabel($object->civicrm_entity_id);
+      $row['eb_question'] = $this->_getEbField($object->eb_entity_id);
+      $row['civicrm_field'] = $this->_getCustomFieldLabel($object->civicrm_entity_id);
 
       // Add to rows with a sortable key.
-      $rows["{$row['eb_ticket_type']} {$object->id}"] = $row;
+      $rows["{$row['eb_question']} {$object->id}"] = $row;
     }
     // Sort rows by keys.
     ksort($rows);
@@ -133,7 +134,7 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
     $eventTitle = $result['name']['text'];
     $this->assign('eventTitle', $eventTitle);
 
-    CRM_Utils_System::setTitle(E::ts('Eventbrite integration: Ticket Types') . ': ' . $eventTitle );
+    CRM_Utils_System::setTitle(E::ts('Eventbrite integration: Questions') . ': ' . $eventTitle );
 
   }
 
@@ -141,54 +142,53 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
    * @inheritDoc
    */
   public function editForm() {
-    return 'CRM_Eventbrite_Form_Manage_Tickettype';
+    return 'CRM_Eventbrite_Form_Manage_Field';
   }
 
   /**
    * @inheritDoc
    */
   public function editName() {
-    return E::ts('Eventbrite Ticket Type Configuration');
+    return E::ts('Eventbrite Question Configuration');
   }
 
   /**
    * @inheritDoc
    */
   public function userContext($mode = NULL) {
-    return 'civicrm/admin/eventbrite/manage/tickettypes';
+    return 'civicrm/admin/eventbrite/manage/fields';
   }
 
   public function userContextParams($mode = NULL) {
     return 'reset=1&action=browse&pid=' . $this->get('pid');
   }
 
-  private function _getEbTicketType($ticketTypeId) {
-    if (empty($ticketTypeId)) {
+  private function _getEbField($fieldId) {
+    if (empty($fieldId)) {
       return '';
     }
 
-    if (empty($this->ebTicketTypes[$ticketTypeId])) {
+    if (empty($this->ebFields[$fieldId])) {
       $eb = CRM_Eventbrite_EvenbriteApi::singleton();
-      $result = $eb->request("/events/{$this->ebEventId}/ticket_classes/{$ticketTypeId}/");
-      $this->ebTicketTypes[$ticketTypeId] = $result['name'];
+      $result = $eb->request("/events/{$this->ebEventId}/questions/{$fieldId}/");
+      $this->ebFields[$fieldId] = $result['question']['text'];
     }
 
-    return $this->ebTicketTypes[$ticketTypeId];
+    return $this->ebFields[$fieldId];
 
   }
 
-  private function _getRoleLabel($roleId) {
-    if (empty($roleId)) {
+  private function _getCustomFieldLabel($customFieldId) {
+    if (empty($customFieldId)) {
       return '';
     }
 
-    if (empty($this->roleLabels[$roleId])) {
-      $this->roleLabels[$roleId] = _eventbrite_civicrmapi('OptionValue', 'getvalue', [
+    if (empty($this->civicrmFields[$customFieldId])) {
+      $this->civicrmFields[$customFieldId] = _eventbrite_civicrmapi('CustomField', 'getvalue', [
         'return' => "label",
-        'option_group_id' => "participant_role",
-        'value' => 1,
+        'id' => $customFieldId,
       ]);
     }
-    return $this->roleLabels[$roleId];
+    return $this->civicrmFields[$customFieldId];
   }
 }

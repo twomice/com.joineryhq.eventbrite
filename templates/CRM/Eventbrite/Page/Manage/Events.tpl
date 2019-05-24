@@ -3,7 +3,7 @@
 {else}
 
   <div class="help">
-    <p>{ts}Manage your Eventbrite Event configurations here{/ts}</p>
+    <p>{ts}Manage your Eventbrite Event configurations.{/ts}</p>
   </div>
 
   <div class="crm-content-block crm-block">
@@ -31,7 +31,7 @@
               {crmAPI var='result' entity='Event' action='getsingle' sequential=0 return="title" id=$row.civicrm_entity_id}
               <td class="crm-eventbrite-eventbrite-entity" data-field="eb_entity_id">{$row.eb_event_name} (ID: {$row.eb_entity_id})</td>
               <td class="crm-eventbrite-civicrm-entity" data-field="civicrm_entity_id">{$result.title} (ID: {$row.civicrm_entity_id})</td>
-              <td>{$row.action|replace:'xx':$row.id}</td>
+              <td>{$row.extraAction|replace:'xx':$row.id}{$row.action|replace:'xx':$row.id}</td>
           </tr>
           {/foreach}
           </table>
