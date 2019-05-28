@@ -44,9 +44,10 @@ class CRM_Eventbrite_Form_Manage_Field extends CRM_Admin_Form {
       $descriptions['delete_warning'] = ts('Are you sure you want to delete this configuration?');
     }
     else {
+      $parentLink = $this->get('parentLink');
+
       // Get Eventbrite questions for the given Eventbrite event.
       $eb = CRM_Eventbrite_EvenbriteApi::singleton();
-      $parentLink = $this->get('parentLink');
       $result = $eb->request("/events/{$parentLink['eb_entity_id']}/questions/");
       $ebFieldOptions = array('' => '');
       if ($ebFields = CRM_Utils_Array::value('questions', $result)) {
@@ -56,24 +57,18 @@ class CRM_Eventbrite_Form_Manage_Field extends CRM_Admin_Form {
       }
       asort($ebFieldOptions);
 
-      $this->add(
-        'select', // field type
-        'eb_entity_id', // field name
-        E::ts('Evenbrite Question'), // field label
-        $ebFieldOptions, // list of options
-        TRUE // is required
-      );
-
       // Get all active civicrm custom fields for contact and participant
       $civicrmFieldOptions = array('' => '');
       $result = _eventbrite_civicrmapi('CustomGroup', 'get', [
         'extends' => ['IN' => ["participant", "individual", "contact"]],
+        'is_active' => 1,
         'options' => array(
           'limit' => 0,
           'sort' => 'title ASC',
         ),
         'api.CustomField.get' => array(
           'is_view' => 0,
+          'is_active' => 1,
           'options' => array(
             'limit' => 0,
             'sort' => 'label ASC',
@@ -81,19 +76,55 @@ class CRM_Eventbrite_Form_Manage_Field extends CRM_Admin_Form {
         ),
       ]);
       foreach ($result['values'] as $customGroup) {
+        if (CRM_Utils_Array::value('extends_entity_column_id', $customGroup) == 2) {
+          if (!in_array($parentLink['civicrm_entity_id'], CRM_Utils_Array::value('extends_entity_column_value', $customGroup, array()))) {
+            // This custom group is limited to specific events, and this event is not one of them.
+            continue;
+          }
+        }
+        elseif (CRM_Utils_Array::value('extends_entity_column_id', $customGroup) == 3) {
+          $eventTypeId = _eventbrite_civicrmapi('Event', 'getvalue', [
+            'return' => "event_type_id",
+            'id' => $parentLink['civicrm_entity_id'],
+          ]);
+          if (!in_array($eventTypeId, CRM_Utils_Array::value('extends_entity_column_value', $customGroup, array()))) {
+            // This custom group is limited to specific types of events, and this event type is not one of them.
+            continue;
+          }
+        }
         foreach ($customGroup['api.CustomField.get']['values'] as $customField) {
           $civicrmFieldOptions[$customField['id']] = "{$customGroup['title']}::{$customField['label']}";
         }
       }
 
-      $this->add(
-        'select', // field type
-        'civicrm_entity_id', // field name
-        E::ts('CiviCRM Custom Field'), // field label
-        $civicrmFieldOptions, // list of options
-        TRUE // is required
-      );
+      $emptyOptionsMessage = '';
+      if (count($ebFieldOptions) <= 1) {
+        $emptyOptionsMessage .= E::ts('No Eventbrite questions were found for this event.');
+      }
 
+      if (count($civicrmFieldOptions) <= 1) {
+        $emptyOptionsMessage .= ' ' . E::ts('No Contact, Individual, or Participant custom fields are configured for this event.');
+      }
+      if (empty($emptyOptionsMessage)) {
+        $this->add(
+          'select', // field type
+          'eb_entity_id', // field name
+          E::ts('Evenbrite Question'), // field label
+          $ebFieldOptions, // list of options
+          TRUE // is required
+        );
+
+        $this->add(
+          'select', // field type
+          'civicrm_entity_id', // field name
+          E::ts('CiviCRM Custom Field'), // field label
+          $civicrmFieldOptions, // list of options
+          TRUE // is required
+        );
+      }
+      else {
+        CRM_Core_Error::statusBounce($emptyOptionsMessage);
+      }
     }
 
     // export form elements

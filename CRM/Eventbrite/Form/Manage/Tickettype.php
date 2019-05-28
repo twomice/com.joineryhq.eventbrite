@@ -56,23 +56,35 @@ class CRM_Eventbrite_Form_Manage_Tickettype extends CRM_Admin_Form {
       }
       asort($ebTicketTypeOptions);
 
-      $this->add(
-        'select', // field type
-        'eb_entity_id', // field name
-        E::ts('Evenbrite Ticket Type'), // field label
-        $ebTicketTypeOptions, // list of options
-        TRUE // is required
-      );
-
       // Get all active civicrm roles
       $civicrmRoleOptions = array('' => '') + CRM_Event_BAO_Participant::buildOptions('participant_role_id');
-      $this->add(
-        'select', // field type
-        'civicrm_entity_id', // field name
-        E::ts('CiviCRM Role'), // field label
-        $civicrmRoleOptions, // list of options
-        TRUE // is required
-      );
+
+      $emptyOptionsMessage = '';
+      if (count($ebTicketTypeOptions) <= 1) {
+        $emptyOptionsMessage .= E::ts('No Eventbrite ticket types were found for this event.');
+      }
+      if (count($civicrmRoleOptions) <= 1) {
+        $emptyOptionsMessage .= ' ' . E::ts('No participant roles are configured in CiviCRM.');
+      }
+      if (empty($emptyOptionsMessage)) {
+        $this->add(
+          'select', // field type
+          'eb_entity_id', // field name
+          E::ts('Evenbrite Ticket Type'), // field label
+          $ebTicketTypeOptions, // list of options
+          TRUE // is required
+        );
+        $this->add(
+          'select', // field type
+          'civicrm_entity_id', // field name
+          E::ts('CiviCRM Role'), // field label
+          $civicrmRoleOptions, // list of options
+          TRUE // is required
+        );
+      }
+      else {
+        CRM_Core_Error::statusBounce($emptyOptionsMessage);
+      }
 
     }
 
