@@ -8,10 +8,9 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
 
   function process() {
 
-    $eb = new CRM_Eventbrite_EvenbriteApi();
+    $eb = CRM_Eventbrite_EvenbriteApi::singleton();
     $attendee = $eb->request("/attendees/{$this->entityId}/");
-
-    
+    dsm($attendee, "attendee {$this->entityId}");
 
 
 

@@ -54,7 +54,7 @@ function civicrm_api3_eventbrite_Runqueue($params) {
         'status_id' => CRM_Eventbrite_BAO_EventbriteQueue::STATUS_ID_PROCESSED,
       );
 //      _eventbrite_civicrmapi('EventbriteQueue', 'create', $apiParams);
-    } catch (CiviCRM_API3_Exception $e) {
+    } catch (CRM_Exception $e) {
       $errorRows[$value['id']] = $e->getMessage();
     }
   }
