@@ -13,7 +13,7 @@ class CRM_Eventbrite_BAO_EventbriteLog extends CRM_Eventbrite_DAO_EventbriteLog 
    *
    * @param array $params key-value pairs
    * @return CRM_Eventbrite_DAO_EventbriteLog|NULL
-   *
+   */
   public static function create($params) {
     $className = 'CRM_Eventbrite_DAO_EventbriteLog';
     $entityName = 'EventbriteLog';
@@ -26,6 +26,6 @@ class CRM_Eventbrite_BAO_EventbriteLog extends CRM_Eventbrite_DAO_EventbriteLog 
     CRM_Utils_Hook::post($hook, $entityName, $instance->id, $instance);
 
     return $instance;
-  } */
+  }
 
 }
