@@ -12,10 +12,9 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
   private $participantId = NULL;
   private $eventId = NULL;
 
-  function process() {
+  public function process() {
     $eb = CRM_Eventbrite_EvenbriteApi::singleton();
     $this->attendee = $eb->request("/attendees/{$this->entityId}/", NULL, array('attendee-answers'));
-    dsm($this->attendee, "attendee {$this->entityId}");
 
     // Ensure we have a link for the event; otherwise any Participants would be nonsensical.
     $this->eventId = _eventbrite_civicrmapi('EventbriteLink', 'getValue', array(
@@ -26,10 +25,10 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     ));
     if (!$this->eventId) {
       CRM_Eventbrite_BAO_EventbriteLog::create(array(
-        'message' => "Could not find EventbriteLink record 'Event' for attendee {$this->entityId} with 'event_id': ". CRM_Utils_Array::value('event_id', $this->attendee) . "; cannot process Attendee. In method ". __METHOD__ . ", file " . __FILE__ . ", line " . __LINE__,
+        'message' => "Could not find EventbriteLink record 'Event' for attendee {$this->entityId} with 'event_id': " . CRM_Utils_Array::value('event_id', $this->attendee) . "; cannot process Attendee. In method " . __METHOD__ . ", file " . __FILE__ . ", line " . __LINE__,
         'message_type_id' => CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_GENERAL,
       ));
-      throw new CRM_Exception("Could not find EventbriteLink 'Event' record for attendee {$this->entityId} with 'event_id': ". CRM_Utils_Array::value('event_id', $this->attendee) . "; cannot process Attendee.");
+      throw new CRM_Exception("Could not find EventbriteLink 'Event' record for attendee {$this->entityId} with 'event_id': " . CRM_Utils_Array::value('event_id', $this->attendee) . "; cannot process Attendee.");
       return;
     }
 
@@ -191,32 +190,27 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
 
     // If participant status is canceled, also cancel the payment record.
     if ($apiParams['participant_status'] == 'Cancelled') {
-      $participantPayments = _eventbrite_civicrmapi('participantPayment', 'get', array(
-        'participant_id' => $participant['id'],
-      ));
-      foreach ($participantPayment['values'] as $value) {
-        _eventbrite_civicrmapi('contribution', 'create', array(
-          'id' => $value['contribution_id'],
-          'contribution_status_id' => 'cancelled',
-        ));
-      }
+      $this->cancelParticipantPayments($participant['id']);
     }
   }
 
   private function updateContactAddresses() {
     if (!empty($this->attendee['profile']['addresses'])) {
-      foreach ($this->attendee['profile']['addresses'] as $addressType => $address){
+      foreach ($this->attendee['profile']['addresses'] as $addressType => $address) {
         $locationTypeId = NULL;
         switch ($addressType) {
           case 'work':
             $locationTypeId = 'Work';
             break;
+
           case 'bill':
             $locationTypeId = 'Billing';
             break;
+
           case 'home':
             $locationTypeId = 'Home';
             break;
+
         }
         if ($locationTypeId) {
           $addresses = _eventbrite_civicrmapi('Address', 'get', array(
@@ -265,32 +259,81 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       $phoneCreate = _eventbrite_civicrmapi('Phone', 'create', array(
         'location_type_id' => $locationType,
         'contact_id' => $this->contactId,
-        'phone' => $phone
+        'phone' => $phone,
       ));
     }
   }
 
-  private function setParticipantStatusRemoved($linkedParticipantId) {
-    // TODO
+  private function setParticipantStatusRemoved($participantId) {
+    _eventbrite_civicrmapi('participant', 'create', array(
+      'id' => $participantId,
+      'participant_status' => 'Removed_in_EventBrite',
+    ));
+    $this->cancelParticipantPayments($participantId);
   }
-  
+
+  private function cancelParticipantPayments($participantId) {
+    $participantPayments = _eventbrite_civicrmapi('participantPayment', 'get', array(
+      'participant_id' => $participantId,
+    ));
+    foreach ($participantPayment['values'] as $value) {
+      _eventbrite_civicrmapi('contribution', 'create', array(
+        'id' => $value['contribution_id'],
+        'contribution_status_id' => 'cancelled',
+      ));
+    }
+  }
+
   private function updateCustomFields() {
-    // TODO: Update any configured custom fields.
-  }
-
-  private function TODO_DELETEME() {
-    // Update/create contact.
-    $contactParams['id'] = $contactId;
-    $contact = _eventbrite_civicrmapi('Contact', 'create', $contactParams);
-    $contactId = CRM_Utils_Array::value('id', $contact);
-
-    $link = _eventbrite_civicrmapi('EventbriteLink', 'create', array(
-      'id' => $linkId,
-      'eb_entity_type' => 'Attendee',
-      'civicrm_entity_type' => 'Contact',
-      'eb_entity_id' => $this->entityId,
-      'civicrm_entity_id' => $contactId,
+    $pid = _eventbrite_civicrmapi('EventbriteLink', 'getValue', array(
+      'eb_entity_type' => 'Event',
+      'civicrm_entity_type' => 'Event',
+      'civicrm_entity_id' => $this->eventId,
+      'return' => 'id',
+    ));
+    $questions = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
+      'parent_id' => $pid,
+      'eb_entity_type' => 'Question',
+      'civicrm_entity_type' => 'CustomField',
     ));
 
+    if (!$questions['count']) {
+      // No questions configured for this event, so just return.
+      return;
+    }
+
+    $keyedQuestions = CRM_Utils_Array::rekey($this->attendee['answers'], 'question_id');
+
+    $contactValues = $participantValues = array();
+
+    foreach ($questions['values'] as $value) {
+      $questionId = CRM_Utils_Array::value('eb_entity_id', $value);
+      $answerValue = $keyedQuestions[$questionId]['answer'];
+
+      $field = civicrm_api3('CustomField', 'getSingle', [
+        'sequential' => 1,
+        'id' => CRM_Utils_Array::value('civicrm_entity_id', $value),
+        'api.CustomGroup.getsingle' => [],
+      ]);
+      $fieldId = $field['id'];
+      $extends = $field['api.CustomGroup.getsingle']['extends'];
+      if ($extends == 'Individual' || $extends == 'Contact') {
+        $contactValues['custom_' . $fieldId] = $answerValue;
+      }
+      elseif ($extends == 'Individual' || $extends == 'Contact') {
+        $participantValues['custom_' . $fieldId] = $answerValue;
+      }
+    }
+
+    if (!empty($participantValues)) {
+      $participantValues['id'] = $this->participantId;
+      $participant = _eventbrite_civicrmapi('participant', 'create', $participantValues);
+    }
+
+    if (!empty($contactValues)) {
+      $contactValues['id'] = $this->contactId;
+      $contact = _eventbrite_civicrmapi('contact', 'create', $contactValues);
+    }
   }
+
 }
