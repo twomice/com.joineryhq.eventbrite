@@ -9,6 +9,31 @@ require_once 'eventbrite.civix.php';
 use CRM_Eventbrite_ExtensionUtil as E;
 
 /**
+ * Implements hook_civicrm_post().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_post
+ */
+function eventbrite_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  if ($op == 'delete') {
+    if (in_array($objectName, array('Participant', 'Contribution', 'Event'))) {
+      $result = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
+        'civicrm_entity_type' => $objectName,
+        'civicrm_entity_id' => $objectId,
+        'api.EventbriteLink.delete' => array(),
+      ));
+    }
+    if ($objectName == 'Participant') {
+      // Also delete PrimaryParticant links.
+      $result = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
+        'civicrm_entity_type' => 'PrimaryParticipant',
+        'civicrm_entity_id' => $objectId,
+        'api.EventbriteLink.delete' => array(),
+      ));
+    }
+  }
+}
+
+/**
  * Implements hook_civicrm_pageRun().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pageRun
