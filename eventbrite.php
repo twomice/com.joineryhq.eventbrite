@@ -3,15 +3,22 @@
 /**
  * TODOS:
  *  - use post hook to delete eventbritelink 'event' records on event.delete op.
- *  - ensure webhook creation process creates TWO webhooks -- one for each event
- *    (order.update, attendee.update), using something like "?webhook_version=1"
- *    in case we later get support for multiple events on a single webhook; and
- *    then be sure the process actually confirms both webhooks with their versions
- *    and events.
  */
 
 require_once 'eventbrite.civix.php';
 use CRM_Eventbrite_ExtensionUtil as E;
+
+/**
+ * Implements hook_civicrm_pageRun().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pageRun
+ */
+function eventbrite_civicrm_pageRun(&$page) {
+  $pageName = $page->getVar('_name');
+  // TODO: on participant and contribution pages, if setting 'eventbrite_is_link_inspect',
+  // display EventbriteLink info with
+  // CRM_Core_Session::setStatus('stuff', E::ts('Eventbrite linked entity'), 'info');
+}
 
 /**
  * Implements hook_civicrm_config().

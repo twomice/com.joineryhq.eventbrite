@@ -155,6 +155,9 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       'email' => $this->attendee['profile']['email'],
       'id' => $this->contactId,
     );
+    if (empty($this->contactId)) {
+      $apiParams['source'] = E::ts('Eventbrite Integration');
+    }
     $contactCreate = _eventbrite_civicrmapi('Contact', 'create', $apiParams, "Processing Attendee {$this->entityId}, attempting to update contact record.");
     $this->contactId = CRM_Utils_Array::value('id', $contactCreate);
     $this->updateContactAddresses();

@@ -206,6 +206,7 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
         'total_amount' => $this->order['costs']['gross']['major_value'],
         'fee_amount' => ($this->order['costs']['eventbrite_fee']['major_value'] + $this->order['costs']['payment_fee']['major_value']),
         'financial_type_id' => $financialTypeId,
+        'source' => E::ts('Eventbrite Integration'),
         'contact_id' => $contactId,
       );
 
