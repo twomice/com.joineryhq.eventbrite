@@ -49,12 +49,14 @@ function civicrm_api3_eventbrite_Runqueue($params) {
           $processedEntities[] = $entityIndentifier;
         }
       }
-      $apiParams = array(
-        'id' => $value['id'],
-        'status_id' => CRM_Eventbrite_BAO_EventbriteQueue::STATUS_ID_PROCESSED,
-      );
-//      FIXME: uncomment this line:
-//      _eventbrite_civicrmapi('EventbriteQueue', 'create', $apiParams);
+      // If we're not in debug mode, mark the queue entry as completed
+      if (! _eventbrite_civicrmapi('Setting', 'getvalue', array('name' => "eventbrite_is_debug"))) {
+        $apiParams = array(
+          'id' => $value['id'],
+          'status_id' => CRM_Eventbrite_BAO_EventbriteQueue::STATUS_ID_PROCESSED,
+        );
+        _eventbrite_civicrmapi('EventbriteQueue', 'create', $apiParams);
+      }
     } catch (CRM_Exception $e) {
       $errorRows[$value['id']] = $e->getMessage();
     }
