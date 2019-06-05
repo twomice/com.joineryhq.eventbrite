@@ -31,10 +31,9 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
     ), "Processing Order {$this->entityId}, attempting to get linked event for order.");
     if (!$this->eventId) {
       CRM_Eventbrite_BAO_EventbriteLog::create(array(
-        'message' => "Could not find EventbriteLink record 'Event' for order {$this->entityId} with 'event_id': " . CRM_Utils_Array::value('event_id', $this->order) . "; cannot process Order. In method " . __METHOD__ . ", file " . __FILE__ . ", line " . __LINE__,
+        'message' => "Could not find EventbriteLink record 'Event' for order {$this->entityId} with 'event_id': " . CRM_Utils_Array::value('event_id', $this->order) . "; skipping Order. In method " . __METHOD__ . ", file " . __FILE__ . ", line " . __LINE__,
         'message_type_id' => CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_GENERAL,
       ));
-      throw new CRM_Exception("Could not find EventbriteLink 'Event' record for order {$this->entityId} with 'event_id': " . CRM_Utils_Array::value('event_id', $this->order) . "; cannot process Order.");
       return;
     }
 

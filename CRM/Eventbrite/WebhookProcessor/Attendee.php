@@ -34,10 +34,9 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     ), "Processing Attendee {$this->entityId}, attempting to get Event ID.");
     if (!$this->eventId) {
       CRM_Eventbrite_BAO_EventbriteLog::create(array(
-        'message' => "Could not find EventbriteLink record 'Event' for attendee {$this->entityId} with 'event_id': " . CRM_Utils_Array::value('event_id', $this->attendee) . "; cannot process Attendee. In method " . __METHOD__ . ", file " . __FILE__ . ", line " . __LINE__,
+        'message' => "Could not find EventbriteLink record 'Event' for attendee {$this->entityId} with 'event_id': " . CRM_Utils_Array::value('event_id', $this->attendee) . "; skipping Attendee. In method " . __METHOD__ . ", file " . __FILE__ . ", line " . __LINE__,
         'message_type_id' => CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_GENERAL,
       ));
-      throw new CRM_Exception("Could not find EventbriteLink 'Event' record for attendee {$this->entityId} with 'event_id': " . CRM_Utils_Array::value('event_id', $this->attendee) . "; cannot process Attendee.");
       return;
     }
 
