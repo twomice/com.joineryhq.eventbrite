@@ -12,9 +12,17 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
   private $participantId = NULL;
   private $eventId = NULL;
 
+  protected function loadData() {
+    if (CRM_Utils_Array::value('resource_uri', $this->data)) {
+      $this->attendee = $this->data;
+    }
+    else {
+      $eb = CRM_Eventbrite_EvenbriteApi::singleton();
+      $this->attendee = $eb->request("/attendees/{$this->entityId}/", NULL, array('attendee-answers'));
+    }
+  }
+
   public function process() {
-    $eb = CRM_Eventbrite_EvenbriteApi::singleton();
-    $this->attendee = $eb->request("/attendees/{$this->entityId}/", NULL, array('attendee-answers'));
 
     // Ensure we have a link for the event; otherwise any Participants would be nonsensical.
     $this->eventId = _eventbrite_civicrmapi('EventbriteLink', 'getValue', array(
@@ -116,7 +124,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
           $this->updateContact();
         }
         // Update the linked Participant status to 'removed in EB'
-        $this->setParticipantStatusRemoved($linkedParticipantId);
+        self::setParticipantStatusRemoved($linkedParticipantId);
         // Create a new Participant record contactId for this event; use this ParticipantId.
         $this->updateParticipant();
       }
@@ -138,6 +146,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     ));
     // Now we should know the contactId, and Contact record has been updated; we also know the ParticipantId and Participant record has been updated.
     $this->updateCustomFields();
+
   }
 
   private function updateContact() {
@@ -264,7 +273,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     }
   }
 
-  private function setParticipantStatusRemoved($participantId) {
+  public static function setParticipantStatusRemoved($participantId) {
     _eventbrite_civicrmapi('participant', 'create', array(
       'id' => $participantId,
       'participant_status' => 'Removed_in_EventBrite',
@@ -308,7 +317,10 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
 
     foreach ($questions['values'] as $value) {
       $questionId = CRM_Utils_Array::value('eb_entity_id', $value);
-      $answerValue = $keyedQuestions[$questionId]['answer'];
+      if (!array_key_exists($questionId, $keyedQuestions)) {
+        continue;
+      }
+      $answerValue = CRM_Utils_Array::value('answer', $keyedQuestions[$questionId]);
 
       $field = civicrm_api3('CustomField', 'getSingle', [
         'sequential' => 1,

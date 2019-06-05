@@ -1,4 +1,5 @@
 <?php
+
 use CRM_Participantletter_ExtensionUtil as E;
 
 /**
@@ -13,12 +14,13 @@ class CRM_Eventbrite_WebhookProcessor {
   /**
    * Initialize the processor.
    *
-   * @param String $data JSON webhook payload, as received from Eventbrite
-   *   webhook.
+   * @param array $data Webhook payload, as received from Eventbrite webhook
+   *  OR Eventbrite entity as received from Eventbrite API.
    */
   public function __construct($data) {
     $this->data = $data;
     $this->setEntityIdentifiers();
+    $this->loadData();
   }
 
   private function setEntityIdentifiers() {
@@ -31,10 +33,20 @@ class CRM_Eventbrite_WebhookProcessor {
     $this->entityType = $pathElements[1];
   }
 
-  public function process() {}
+  protected function loadData() {
+
+  }
+
+  public function process() {
+
+  }
 
   public function getEntityIdentifier() {
     return "{$this->entityType}_{$this->entityId}";
+  }
+
+  public function get($property) {
+    return $this->$property;
   }
 
 }

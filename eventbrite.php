@@ -213,8 +213,8 @@ function eventbrite_civicrm_navigationMenu(&$menu) {
  * Log CiviCRM API errors to CiviCRM log.
  */
 function _eventbrite_log_api_error(CiviCRM_API3_Exception $e, $entity, $action, $params) {
-  $message = "CiviCRM API Error '{$entity}.{$action}': ". $e->getMessage() .'; ';
-  $message .= "API parameters when this error happened: ". json_encode($params) .'; ';
+  $message = "CiviCRM API Error '{$entity}.{$action}': " . $e->getMessage() . '; ';
+  $message .= "API parameters when this error happened: " . json_encode($params) . '; ';
   $bt = debug_backtrace();
   $error_location = "{$bt[1]['file']}::{$bt[1]['line']}";
   $message .= "Error API called from: $error_location";
@@ -224,11 +224,21 @@ function _eventbrite_log_api_error(CiviCRM_API3_Exception $e, $entity, $action, 
 /**
  * CiviCRM API wrapper. Wraps with try/catch, redirects errors to log, saves
  * typing.
+ *
+ * @param string $entity as in civicrm_api3($ENTITY, ..., ...)
+ * @param string $action as in civicrm_api3(..., $ACTION, ...)
+ * @param array $params as in civicrm_api3(..., ..., $PARAMS)
+ * @param string $contextMessage Additional message for inclusion in EventbriteLog upon any failures.
+ * @param bool $silence_errors If TRUE, throw any exceptions we catch; otherwise don't.
+ *
+ * @return Array result of civicrm_api3()
+ * @throws CiviCRM_API3_Exception
  */
-function _eventbrite_civicrmapi($entity, $action, $params, $silence_errors = TRUE) {
+function _eventbrite_civicrmapi($entity, $action, $params, $contextMessage = NULL, $silence_errors = TRUE) {
   try {
     $result = civicrm_api3($entity, $action, $params);
-  } catch (CiviCRM_API3_Exception $e) {
+  }
+  catch (CiviCRM_API3_Exception $e) {
     _eventbrite_log_api_error($e, $entity, $action, $params);
     if (!$silence_errors) {
       throw $e;
