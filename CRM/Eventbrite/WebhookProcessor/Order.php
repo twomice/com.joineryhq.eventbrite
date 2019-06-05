@@ -1,5 +1,6 @@
 <?php
-use CRM_Participantletter_ExtensionUtil as E;
+
+use CRM_Eventbrite_ExtensionUtil as E;
 
 /**
  * Class for processing Eventbrite 'Order' webhook events.

@@ -1,6 +1,6 @@
 <?php
 
-use CRM_Participantletter_ExtensionUtil as E;
+use CRM_Eventbrite_ExtensionUtil as E;
 
 /**
  * Processor for Eventbrite webhook messages.
