@@ -37,7 +37,7 @@ return array(
     'add' => '5.0',
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => E::ts('Display pop-up data on linked entities such as contacts, participants, and contributions.'),
+    'description' => E::ts('Display pop-up data on linked entities such as participants and contributions.'),
     'title' => E::ts('Enable Link Inspection'),
     'type' => 'Boolean',
     'quick_form_type' => 'YesNo',
