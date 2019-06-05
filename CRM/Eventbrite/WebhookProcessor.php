@@ -24,7 +24,10 @@ class CRM_Eventbrite_WebhookProcessor {
   }
 
   private function setEntityIdentifiers() {
-    if (!$apiUrl = CRM_utils_array::value('api_url', $this->data)) {
+    if (
+      !($apiUrl = CRM_utils_array::value('api_url', $this->data))
+      && !($apiUrl = CRM_utils_array::value('resource_uri', $this->data))
+    ) {
       throw new CRM_Exception('Bad data. Missing parameter "api_url" in message');
     }
     $path = rtrim(parse_url($apiUrl, PHP_URL_PATH), '/');

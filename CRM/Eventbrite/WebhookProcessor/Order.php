@@ -1,4 +1,5 @@
 <?php
+use CRM_Participantletter_ExtensionUtil as E;
 
 /**
  * Class for processing Eventbrite 'Order' webhook events.
@@ -20,7 +21,6 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
   }
 
   public function process() {
-
     // Ensure we have a link for the event; otherwise any received data would be nonsensical.
     $this->eventId = _eventbrite_civicrmapi('EventbriteLink', 'getValue', array(
       'eb_entity_type' => 'Event',
@@ -172,7 +172,6 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
         'registered_by_id' => $primaryParticipantId,
       ), "Processing Order {$this->entityId}, attempting to associate participant '$orderParticipantId' with order primary participant '$primaryParticipantId'.");
     }
-
     // Delete any existing link for existingPrimaryParticipantId
     if ($existingPrimaryParticipantLinkId) {
       _eventbrite_civicrmapi('EventbriteLink', 'delete', array(
@@ -191,7 +190,8 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
     $event = _eventbrite_civicrmapi('Event', 'getSingle', array(
       'id' => $this->eventId,
     ), "Processing Order {$this->entityId}, attempting to get the CiviCRM Event for this order.");
-    if (CRM_Utils_Array::value('is_monetary', $event)) {
+    $isMonetary = CRM_Utils_Array::value('is_monetary', $event);
+    if ($isMonetary) {
       $financialTypeId = CRM_Utils_Array::value('financial_type_id', $event);
 
       $contactId = _eventbrite_civicrmapi('participant', 'getValue', array(

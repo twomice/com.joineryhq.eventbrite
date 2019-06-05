@@ -9,7 +9,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
 
   private $attendee;
   private $contactId = NULL;
-  private $participantId = NULL;
+  protected $participantId = NULL;
   private $eventId = NULL;
 
   protected function loadData() {
@@ -77,19 +77,20 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     );
 
     // Start with a collection of contacts matching the latest Attendee data, per the Contact.duplicatecheck API;
-    $result = _eventbrite_civicrmapi('Contact', 'duplicatecheck',array(
+    $result = _eventbrite_civicrmapi('Contact', 'duplicatecheck', array(
       'match' => $contactParams,
     ), "Processing Attendee {$this->entityId}.");
     $duplicateCheckContactIds = array_keys($result['values']);
 
     // Also start with a Participant linked to the Attendee ID, if any.
-    $link = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
+    $linkParams = array(
       'eb_entity_type' => 'Attendee',
       'civicrm_entity_type' => 'Participant',
       'eb_entity_id' => $this->entityId,
       'sequential' => 1,
       'api.Participant.get' => ['id' => '$value.civicrm_entity_id'],
-    ), "Processing Attendee {$this->entityId}, attempting to get linked Participant.");
+    );
+    $link = _eventbrite_civicrmapi('EventbriteLink', 'get', $linkParams, "Processing Attendee {$this->entityId}, attempting to get linked Participant.");
     $linkId = CRM_Utils_Array::value('id', $link);
     if (!empty($link['values'])) {
       $linkedParticipantId = CRM_Utils_Array::value('civicrm_entity_id', $link['values'][0]);
@@ -132,6 +133,8 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       ), "Processing Attendee {$this->entityId}, attempting to delete Attendee/Participant link.");
     }
     else {
+      // use the lowest duplicatecheck ContactId if any.
+      $this->contactId = min($duplicateCheckContactIds);
       $this->updateContact();
       $this->updateParticipant();
     }
@@ -144,7 +147,6 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     ), "Processing Attendee {$this->entityId}, attempting to create new Attendee/Participant link.");
     // Now we should know the contactId, and Contact record has been updated; we also know the ParticipantId and Participant record has been updated.
     $this->updateCustomFields();
-
   }
 
   private function updateContact() {
@@ -278,7 +280,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     _eventbrite_civicrmapi('participant', 'create', array(
       'id' => $participantId,
       'participant_status' => 'Removed_in_EventBrite',
-    ), "Processing Attendee {$this->entityId}, attempting to mark participant as 'Removed in Eventbrite'.");
+    ), "Processing Participant {$participantId}, attempting to mark participant as 'Removed in Eventbrite'.");
     $this->cancelParticipantPayments($participantId);
   }
 
