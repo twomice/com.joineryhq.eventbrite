@@ -1,8 +1,8 @@
 <?php
 
 require_once 'CRM/Core/Form.php';
-use CRM_Eventbrite_ExtensionUtil as E;
 
+use CRM_Eventbrite_ExtensionUtil as E;
 
 /**
  * Form controller class for extension Settings form.
@@ -18,37 +18,31 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
   private $_submittedValues = array();
   private $_settings = array();
 
-  function __construct(
-    $state = NULL,
-    $action = CRM_Core_Action::NONE,
-    $method = 'post',
-    $name = NULL
+  public function __construct(
+  $state = NULL, $action = CRM_Core_Action::NONE, $method = 'post', $name = NULL
   ) {
 
     $this->setSettings();
 
     parent::__construct(
-      $state = NULL,
-      $action = CRM_Core_Action::NONE,
-      $method = 'post',
-      $name = NULL
+      $state = NULL, $action = CRM_Core_Action::NONE, $method = 'post', $name = NULL
     );
   }
-  function buildQuickForm() {
+
+  public function buildQuickForm() {
     $settings = $this->_settings;
     foreach ($settings as $name => $setting) {
       if (isset($setting['quick_form_type'])) {
-        switch($setting['html_type']) {
+        switch ($setting['html_type']) {
           case 'Select':
             $this->add(
               $setting['html_type'], // field type
               $setting['name'], // field name
               $setting['title'], // field label
-              $this->getSettingOptions($setting),
-              NULL,
-              $setting['html_attributes']
+              $this->getSettingOptions($setting), NULL, $setting['html_attributes']
             );
             break;
+
           case 'CheckBox':
             $this->addCheckBox(
               $setting['name'], // field name
@@ -56,6 +50,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
               array_flip($this->getSettingOptions($setting))
             );
             break;
+
           case 'Radio':
             $this->addRadio(
               $setting['name'], // field name
@@ -63,6 +58,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
               $this->getSettingOptions($setting)
             );
             break;
+
           default:
             $add = 'add' . $setting['quick_form_type'];
             if ($add == 'addElement') {
@@ -72,12 +68,13 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
               $this->$add($name, ts($setting['title']));
             }
             break;
+
         }
       }
       $descriptions[$setting['name']] = ts($setting['description']);
 
       if (!empty($setting['X_form_rules_args'])) {
-        $rules_args = (array)$setting['X_form_rules_args'];
+        $rules_args = (array) $setting['X_form_rules_args'];
         foreach ($rules_args as $rule_args) {
           array_unshift($rule_args, $setting['name']);
           call_user_func_array(array($this, 'addRule'), $rule_args);
@@ -87,11 +84,11 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
     $this->assign("descriptions", $descriptions);
 
     $this->addButtons(array(
-      array (
+      array(
         'type' => 'submit',
         'name' => ts('Submit'),
         'isDefault' => TRUE,
-      )
+      ),
     ));
 
     $style_path = CRM_Core_Resources::singleton()->getPath(self::$extensionName, 'css/extension.css');
@@ -102,13 +99,14 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
     // export form elements
     $this->assign('elementNames', $this->getRenderableElementNames());
 
-    $this->_validateTokenOnFormLoad();
-    $this->_confirmWebhookOnFormLoad();
+    if ($this->_validateTokenOnFormLoad()) {
+      $this->_confirmWebhookOnFormLoad();
+    }
 
     parent::buildQuickForm();
   }
 
-  function postProcess() {
+  public function postProcess() {
     $this->_submittedValues = $this->exportValues();
     $this->saveSettings();
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/admin/eventbrite/settings', 'reset=1'));
@@ -120,7 +118,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
    *
    * @return array (string)
    */
-  function getRenderableElementNames() {
+  private function getRenderableElementNames() {
     // The _elements list includes some items which should not be
     // auto-rendered in the loop -- such as "qfKey" and "buttons". These
     // items don't have labels. We'll identify renderable by filtering on
@@ -137,26 +135,22 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
 
   /**
    * Define the list of settings we are going to allow to be set on this form.
-   *
-   * @return array
    */
-  function setSettings() {
+  private function setSettings() {
     if (empty($this->_settings)) {
       $this->_settings = self::getSettings();
     }
   }
 
-  static function getSettings() {
-    $settings =  _eventbrite_civicrmapi('setting', 'getfields', array('filters' => self::$settingFilter));
+  private static function getSettings() {
+    $settings = _eventbrite_civicrmapi('setting', 'getfields', array('filters' => self::$settingFilter));
     return $settings['values'];
   }
 
   /**
    * Get the settings we are going to allow to be set on this form.
-   *
-   * @return array
    */
-  function saveSettings() {
+  private function saveSettings() {
     $settings = $this->_settings;
     $values = array_intersect_key($this->_submittedValues, $settings);
     _eventbrite_civicrmapi('setting', 'create', $values);
@@ -183,7 +177,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
    *
    * @see CRM_Core_Form::setDefaultValues()
    */
-  function setDefaultValues() {
+  public function setDefaultValues() {
     static $ret;
     if (!isset($ret)) {
       $result = _eventbrite_civicrmapi('setting', 'get', array(
@@ -205,7 +199,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
       $options[$id] = $value['title'];
     }
     asort($options);
-    $options = array(0 => '- '. ts('none') . ' -') + $options;
+    $options = array(0 => '- ' . ts('none') . ' -') + $options;
     return $options;
   }
 
@@ -246,25 +240,28 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
     }
   }
 
- /**
-  * Upon displaying the form (i.e., only if it's not being submitted now),
-  * perform a validation check on the saved Eventbrite token (if there is one)
-  * and print a message if it's invalid.
-  */
+  /**
+   * Upon displaying the form (i.e., only if it's not being submitted now),
+   * perform a validation check on the saved Eventbrite token (if there is one)
+   * and print a message if it's invalid.
+   */
   private function _validateTokenOnFormLoad() {
+    $isPass = TRUE;
     if (!$this->_flagSubmitted) {
       if ($token = CRM_Utils_Array::value('eventbrite_api_token', $this->setDefaultValues())) {
         $eb = CRM_Eventbrite_EvenbriteApi::singleton();
         $result = $eb->request('/users/me/');
         if ($error = CRM_Utils_Array::value('error', $result)) {
+          $isPass = FALSE;
           $error_message = CRM_Utils_Array::value('status_code', $result);
-          $error_message .= ': '. $error;
-          $error_message .= ': '. CRM_Utils_Array::value('error_description', $result);
+          $error_message .= ': ' . $error;
+          $error_message .= ': ' . CRM_Utils_Array::value('error_description', $result);
           $msg = E::ts('Eventbrite said: <em>%1</em>', array('1' => $error_message));
           CRM_Core_Session::setStatus($msg, E::ts('Eventbrite token'), 'error');
         }
       }
     }
+    return $isPass;
   }
 
   private function _confirmWebhookOnFormLoad() {
@@ -282,8 +279,8 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
           $result = $eb->request('/webhooks/', $body, NULL, 'POST');
           if ($error = CRM_Utils_Array::value('error', $result)) {
             $error_message = CRM_Utils_Array::value('status_code', $result);
-            $error_message .= ': '. $error;
-            $error_message .= ': '. CRM_Utils_Array::value('error_description', $result);
+            $error_message .= ': ' . $error;
+            $error_message .= ': ' . CRM_Utils_Array::value('error_description', $result);
             $msg = E::ts('Error establishing webhook configuration via Eventbrite API. Eventbrite said: <em>%1</em>', array('1' => $error_message));
             CRM_Core_Session::setStatus($msg, E::ts('Eventbrite webhook'), 'error');
           }
@@ -291,5 +288,5 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
       }
     }
   }
-}
 
+}

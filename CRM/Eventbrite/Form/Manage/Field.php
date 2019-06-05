@@ -28,7 +28,7 @@ class CRM_Eventbrite_Form_Manage_Field extends CRM_Admin_Form {
       }
     }
   }
-  
+
   /**
    * Explicitly declare the entity api name.
    */
