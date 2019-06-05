@@ -12,12 +12,8 @@ return array(
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => E::ts('See "Creating Your Personal OAuth Token" on the Eventbrite documentation page <a href="https://www.eventbrite.com/platform/docs/authentication" target="blank">Authenticating Your Access to the Eventbrite API</a>.'),
-    'title' =>  E::ts('Eventbrite Personal OAuth Token'),
-//    'help_text' => '',
+    'title' => E::ts('Eventbrite Personal OAuth Token'),
     'html_type' => 'Text',
-//    'html_attributes' => array(
-//      'size' => 10,
-//    ),
     'quick_form_type' => 'Element',
   ),
   'eventbrite_api_organization_id' => array(
@@ -29,12 +25,7 @@ return array(
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => E::ts('Eventbrite system ID for the Eventbrite organization to which all linked events will belong.'),
-    'title' =>  E::ts('Eventbrite API Organization ID'),
-//    'help_text' => '',
+    'title' => E::ts('Eventbrite API Organization ID'),
     'html_type' => 'Text',
-//    'html_attributes' => array(
-//      'size' => 10,
-//    ),
-//    'quick_form_type' => 'hidden',
   ),
- );
+);

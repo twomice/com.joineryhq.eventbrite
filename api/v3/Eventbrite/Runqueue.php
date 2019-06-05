@@ -12,7 +12,7 @@ use CRM_Eventbrite_ExtensionUtil as E;
 function _civicrm_api3_eventbrite_Runqueue_spec(&$spec) {
   $spec['limit'] = array(
     'description' => E::ts('Maxiumum number of queued items to process per invocation.'),
-    'api.default' => 0
+    'api.default' => 0,
   );
 }
 
@@ -30,7 +30,7 @@ function civicrm_api3_eventbrite_Runqueue($params) {
     'status_id' => CRM_Eventbrite_BAO_EventbriteQueue::STATUS_ID_NEW,
     'options' => array(
       'limit' => $params['limit'],
-    )
+    ),
   );
   $result = _eventbrite_civicrmapi('EventbriteQueue', 'get', $apiParams);
 
@@ -50,14 +50,15 @@ function civicrm_api3_eventbrite_Runqueue($params) {
         }
       }
       // If we're not in debug mode, mark the queue entry as completed
-      if (! _eventbrite_civicrmapi('Setting', 'getvalue', array('name' => "eventbrite_is_debug"))) {
+      if (!(_eventbrite_civicrmapi('Setting', 'getvalue', array('name' => "eventbrite_is_debug")))) {
         $apiParams = array(
           'id' => $value['id'],
           'status_id' => CRM_Eventbrite_BAO_EventbriteQueue::STATUS_ID_PROCESSED,
         );
         _eventbrite_civicrmapi('EventbriteQueue', 'create', $apiParams);
       }
-    } catch (CRM_Exception $e) {
+    }
+    catch (CRM_Exception $e) {
       $errorRows[$value['id']] = $e->getMessage();
     }
   }
@@ -67,8 +68,8 @@ function civicrm_api3_eventbrite_Runqueue($params) {
       'Processed' => $processedRows,
       'Errors' => $errorRows,
       'Duplicates' => $duplicateRows,
-    )
+    ),
   );
   return civicrm_api3_create_success($returnValues, $params, 'Eventbrite', 'runqueue');
-  
+
 }

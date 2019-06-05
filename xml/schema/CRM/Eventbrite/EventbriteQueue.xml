@@ -30,7 +30,7 @@
     <default>CURRENT_TIMESTAMP</default>
     <add>5.0</add>
   </field>
-    
+
   <field>
     <name>message</name>
     <type>text</type>

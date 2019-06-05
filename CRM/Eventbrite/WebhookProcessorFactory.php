@@ -4,7 +4,7 @@
  * Processor for Eventbrite webhook messages.
  */
 class CRM_Eventbrite_WebhookProcessorFactory {
-  static function create($webhookData) {
+  public static function create($webhookData) {
     if (!$data = json_decode($webhookData, TRUE)) {
       throw new CRM_Exception('Bad data. Could not parse JSON.');
     }
@@ -16,14 +16,18 @@ class CRM_Eventbrite_WebhookProcessorFactory {
       case 'order.updated':
         $processor = new CRM_Eventbrite_WebhookProcessor_Order($data);
         break;
+
       case 'attendee.updated':
         $processor = new CRM_Eventbrite_WebhookProcessor_Attendee($data);
         break;
+
       default:
         $processor = FALSE;
         break;
+
     }
 
     return $processor;
   }
+
 }

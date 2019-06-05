@@ -58,20 +58,20 @@ class CRM_Eventbrite_Page_Manage_Events extends CRM_Core_Page_Basic {
           'title' => E::ts('Edit Event Ticket Types'),
           'class' => 'no-popup',
         ),
-        (CRM_Core_Action::MAX_ACTION * 2) =>array(
+        (CRM_Core_Action::MAX_ACTION * 2) => array(
           'name' => E::ts('Questions'),
           'url' => 'civicrm/admin/eventbrite/manage/fields/',
           'qs' => 'action=browse&pid=%%id%%&reset=1',
           'title' => E::ts('Edit Event Questions'),
           'class' => 'no-popup',
         ),
-        (CRM_Core_Action::MAX_ACTION * 3) =>array(
+        (CRM_Core_Action::MAX_ACTION * 3) => array(
           'name' => E::ts('Edit'),
           'url' => 'civicrm/admin/eventbrite/manage/events/',
           'qs' => 'action=update&id=%%id%%&reset=1',
           'title' => E::ts('Edit Event Configuration'),
         ),
-        (CRM_Core_Action::MAX_ACTION * 4) =>array(
+        (CRM_Core_Action::MAX_ACTION * 4) => array(
           'name' => E::ts('Delete'),
           'url' => 'civicrm/admin/eventbrite/manage/events/',
           'qs' => 'action=delete&id=%%id%%',

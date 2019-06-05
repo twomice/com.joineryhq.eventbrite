@@ -5,7 +5,7 @@ class CRM_Eventbrite_BAO_EventbriteQueue extends CRM_Eventbrite_DAO_EventbriteQu
 
   const STATUS_ID_NEW = 1;
   const STATUS_ID_PROCESSED = 2;
-  
+
   /**
    * Create a new EventbriteQueue based on array-data
    *

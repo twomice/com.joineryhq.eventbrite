@@ -62,19 +62,17 @@ class CRM_Eventbrite_Page_Manage_Fields extends CRM_Core_Page_Basic {
       $this->set('pid', CRM_Utils_Request::retrieve('pid', 'Positive'));
     }
 
-
     $breadCrumb = array(
       'title' => E::ts('Eventbrite Events'),
       'url' => CRM_Utils_System::url('civicrm/admin/eventbrite/manage/events', 'action=browse&reset=1&pid=' . $this->get('pid')),
     );
     CRM_Utils_System::appendBreadCrumb(array($breadCrumb));
-    
+
     $breadCrumb = array(
       'title' => E::ts('Eventbrite Questions'),
       'url' => CRM_Utils_System::url('civicrm/admin/eventbrite/manage/fields', 'action=browse&reset=1&pid=' . $this->get('pid')),
     );
     CRM_Utils_System::appendBreadCrumb(array($breadCrumb));
-
 
     return parent::run();
   }
@@ -101,7 +99,7 @@ class CRM_Eventbrite_Page_Manage_Fields extends CRM_Core_Page_Basic {
     $baoString = $this->getBAOName();
     $object = new $baoString();
     $where = crm_core_dao::composeQuery('parent_id = %1 AND eb_entity_type = "Question"', array(
-      '1' => array($this->get('pid'), 'String')
+      '1' => array($this->get('pid'), 'String'),
     ));
     $object->whereAdd($where);
 
@@ -134,7 +132,7 @@ class CRM_Eventbrite_Page_Manage_Fields extends CRM_Core_Page_Basic {
     $eventTitle = $result['name']['text'];
     $this->assign('eventTitle', $eventTitle);
 
-    CRM_Utils_System::setTitle(E::ts('Eventbrite integration: Questions') . ': ' . $eventTitle );
+    CRM_Utils_System::setTitle(E::ts('Eventbrite integration: Questions') . ': ' . $eventTitle);
 
   }
 
@@ -191,4 +189,5 @@ class CRM_Eventbrite_Page_Manage_Fields extends CRM_Core_Page_Basic {
     }
     return $this->civicrmFields[$customFieldId];
   }
+
 }

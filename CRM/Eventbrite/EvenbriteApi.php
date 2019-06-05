@@ -11,7 +11,7 @@ class CRM_Eventbrite_EvenbriteApi {
 
   /**
    * Constructor.
-   * @param type $token Eventbrite private OAuth token.
+   * @param string $token Eventbrite private OAuth token.
    */
   private function __construct($token = NULL) {
     if (isset($token)) {
@@ -27,10 +27,10 @@ class CRM_Eventbrite_EvenbriteApi {
   /**
    * Singleton pattern.
    *
-   * @see __construct().
+   * @see __construct()
    *
-   * @param type $token
-   * @return type
+   * @param string $token
+   * @return object This
    */
   public static function singleton($token = NULL) {
     if (self::$_singleton === NULL) {
@@ -45,7 +45,7 @@ class CRM_Eventbrite_EvenbriteApi {
    * @param string $path Endpoint, sans self::EVENTBRITE_APIv3_URL
    * @param array $body Optional body for POST and PUT requests. Array, will be
    *    json-encoded before sending.
-   * @param type $expand Array of 'expand' options for Eventbrite API.
+   * @param array $expand Array of 'expand' options for Eventbrite API.
    *    See: https://www.eventbrite.com/platform/api#/introduction/expansions
    * @param string $method HTTP verb: GET, POST, etc.
    * @return array
@@ -73,8 +73,8 @@ class CRM_Eventbrite_EvenbriteApi {
     }
 
     $context = stream_context_create($options);
-    $result = file_get_contents($url, false, $context);
-    $response = json_decode($result, true);
+    $result = file_get_contents($url, FALSE, $context);
+    $response = json_decode($result, TRUE);
     if ($response == NULL) {
       $response = array();
     }

@@ -62,7 +62,7 @@
     <comment>FK to id</comment>
     <add>5.0</add>
   </field>
-  
+
   <foreignKey>
     <name>parent_id</name>
     <table>civicrm_eventbrite_link</table>
