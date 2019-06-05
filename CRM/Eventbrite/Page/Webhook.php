@@ -11,9 +11,8 @@ class CRM_Eventbrite_Page_Webhook extends CRM_Core_Page {
       $this->respond('Bad data. Could not parse JSON.', 422);
     }
     else {
-      // TODO: we'll probably just send this to a queue, which will be processed
-      // entry-by-entry on a schedule, to avoid duplicate handling of identical
-      // webhook events.
+      // Send this to the queue, which will be processed entry-by-entry on a
+      // schedule, to avoid duplicate handling of identical webhook events.
       $params = array(
         'message' => $input,
       );
@@ -22,21 +21,19 @@ class CRM_Eventbrite_Page_Webhook extends CRM_Core_Page {
         $result = _eventbrite_civicrmapi('EventbriteQueue', 'create', $params);
       }
       catch (CiviCRM_API3_Exception $e) {
-        $params = array(
+        CRM_Eventbrite_BAO_EventbriteLog::create(array(
           'message_type_id' => CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_INBOUND_WEBHOOK,
           'message' => 'Failed writing webhook to queue.
              Error: ' . $e->getMessage() . '
              Webhook input: ' . $input . '
           ',
-        );
-        $result = _eventbrite_civicrmapi('EventbriteLog', 'create', $params);
+        ));
         $this->respond('CiviCRM API error.', 500);
       }
 
       $this->respond('Done.', 200);
     }
   }
-
 
   private static function respond($msg, $response) {
     http_response_code($response);

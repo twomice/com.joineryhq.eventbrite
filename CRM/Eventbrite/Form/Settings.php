@@ -249,15 +249,21 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
     $isPass = TRUE;
     if (!$this->_flagSubmitted) {
       if ($token = CRM_Utils_Array::value('eventbrite_api_token', $this->setDefaultValues())) {
-        $eb = CRM_Eventbrite_EvenbriteApi::singleton();
-        $result = $eb->request('/users/me/');
-        if ($error = CRM_Utils_Array::value('error', $result)) {
+        try {
+          $eb = CRM_Eventbrite_EvenbriteApi::singleton();
+          $result = $eb->request('/users/me/');
+          if ($error = CRM_Utils_Array::value('error', $result)) {
+            $isPass = FALSE;
+            $error_message = CRM_Utils_Array::value('status_code', $result);
+            $error_message .= ': ' . $error;
+            $error_message .= ': ' . CRM_Utils_Array::value('error_description', $result);
+            $msg = E::ts('Eventbrite said: <em>%1</em>', array('1' => $error_message));
+            CRM_Core_Session::setStatus($msg, E::ts('Eventbrite token'), 'error');
+          }
+        }
+        catch (CRM_Core_Exception $e) {
+          CRM_Core_Session::setStatus($e->getMessage(), E::ts('Eventbrite API Exception'), 'error');
           $isPass = FALSE;
-          $error_message = CRM_Utils_Array::value('status_code', $result);
-          $error_message .= ': ' . $error;
-          $error_message .= ': ' . CRM_Utils_Array::value('error_description', $result);
-          $msg = E::ts('Eventbrite said: <em>%1</em>', array('1' => $error_message));
-          CRM_Core_Session::setStatus($msg, E::ts('Eventbrite token'), 'error');
         }
       }
     }
@@ -267,23 +273,28 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
   private function _confirmWebhookOnFormLoad() {
     if (!$this->_flagSubmitted) {
       if ($token = CRM_Utils_Array::value('eventbrite_api_token', $this->setDefaultValues())) {
-        $eb = CRM_Eventbrite_EvenbriteApi::singleton();
-        $result = $eb->request('/webhooks/');
-        $endPoints = CRM_Utils_Array::collect('endpoint_url', $result['webhooks']);
-        $myListener = CRM_Eventbrite_Utils::getWebhookListenerUrl();
-        if (!in_array($myListener, $endPoints)) {
-          $body = array(
-            'endpoint_url' => $myListener,
-            'actions' => array("event.created", "event.published", "event.unpublished", "event.updated", "attendee.updated", "barcode.checked_in", "barcode.un_checked_in", "order.placed", "order.refunded", "order.updated", "organizer.updated", "ticket_class.created", "ticket_class.deleted", "ticket_class.updated", "venue.updated"),
-          );
-          $result = $eb->request('/webhooks/', $body, NULL, 'POST');
-          if ($error = CRM_Utils_Array::value('error', $result)) {
-            $error_message = CRM_Utils_Array::value('status_code', $result);
-            $error_message .= ': ' . $error;
-            $error_message .= ': ' . CRM_Utils_Array::value('error_description', $result);
-            $msg = E::ts('Error establishing webhook configuration via Eventbrite API. Eventbrite said: <em>%1</em>', array('1' => $error_message));
-            CRM_Core_Session::setStatus($msg, E::ts('Eventbrite webhook'), 'error');
+        try {
+          $eb = CRM_Eventbrite_EvenbriteApi::singleton();
+          $result = $eb->request('/webhooks/');
+          $endPoints = CRM_Utils_Array::collect('endpoint_url', $result['webhooks']);
+          $myListener = CRM_Eventbrite_Utils::getWebhookListenerUrl();
+          if (!in_array($myListener, $endPoints)) {
+            $body = array(
+              'endpoint_url' => $myListener,
+              'actions' => array("event.created", "event.published", "event.unpublished", "event.updated", "attendee.updated", "barcode.checked_in", "barcode.un_checked_in", "order.placed", "order.refunded", "order.updated", "organizer.updated", "ticket_class.created", "ticket_class.deleted", "ticket_class.updated", "venue.updated"),
+            );
+            $result = $eb->request('/webhooks/', $body, NULL, 'POST');
+            if ($error = CRM_Utils_Array::value('error', $result)) {
+              $error_message = CRM_Utils_Array::value('status_code', $result);
+              $error_message .= ': ' . $error;
+              $error_message .= ': ' . CRM_Utils_Array::value('error_description', $result);
+              $msg = E::ts('Error establishing webhook configuration via Eventbrite API. Eventbrite said: <em>%1</em>', array('1' => $error_message));
+              CRM_Core_Session::setStatus($msg, E::ts('Eventbrite webhook'), 'error');
+            }
           }
+        }
+        catch (CRM_Core_Exception $e) {
+          CRM_Core_Session::setStatus($e->getMessage(), E::ts('Eventbrite API Exception'), 'error');
         }
       }
     }

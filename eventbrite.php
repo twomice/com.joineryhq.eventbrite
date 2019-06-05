@@ -212,13 +212,22 @@ function eventbrite_civicrm_navigationMenu(&$menu) {
 /**
  * Log CiviCRM API errors to CiviCRM log.
  */
-function _eventbrite_log_api_error(CiviCRM_API3_Exception $e, $entity, $action, $params) {
+function _eventbrite_log_api_error(CiviCRM_API3_Exception $e, $entity, $action, $contextMessage = NULL, $params) {
   $message = "CiviCRM API Error '{$entity}.{$action}': " . $e->getMessage() . '; ';
   $message .= "API parameters when this error happened: " . json_encode($params) . '; ';
   $bt = debug_backtrace();
   $error_location = "{$bt[1]['file']}::{$bt[1]['line']}";
   $message .= "Error API called from: $error_location";
   CRM_Core_Error::debug_log_message($message);
+
+  $eventbriteLogMessage = $message;
+  if ($contextMessage) {
+    $eventbriteLogMessage .= "; Context: $contextMessage";
+  }
+  CRM_Eventbrite_BAO_EventbriteLog::create(array(
+    'message' => $eventbriteLogMessage,
+    'message_type_id' => CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_CIVICRM_API_ERROR,
+  ));
 }
 
 /**
@@ -239,7 +248,7 @@ function _eventbrite_civicrmapi($entity, $action, $params, $contextMessage = NUL
     $result = civicrm_api3($entity, $action, $params);
   }
   catch (CiviCRM_API3_Exception $e) {
-    _eventbrite_log_api_error($e, $entity, $action, $params);
+    _eventbrite_log_api_error($e, $entity, $action, $contextMessage, $params);
     if (!$silence_errors) {
       throw $e;
     }

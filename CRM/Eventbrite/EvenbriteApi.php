@@ -73,11 +73,46 @@ class CRM_Eventbrite_EvenbriteApi {
     }
 
     $context = stream_context_create($options);
-    $result = file_get_contents($url, FALSE, $context);
+    $result = @file_get_contents($url, FALSE, $context);
+    // Log error if $result is null, probably network is unreachable.
+    if ($result == NULL) {
+      $bt = debug_backtrace();
+      $error_location = "{$bt[1]['file']}::{$bt[1]['line']}";
+
+      $messageLines = array(
+        "Eventbrite API error: No response returned. Suspect network connection is down.",
+        "Request URL: $url",
+        "Method: $method",
+        "Body: ". json_encode($body),
+        "API called from: $error_location",
+      );
+      CRM_Eventbrite_BAO_EventbriteLog::create(array(
+        'message' => implode("\n", $messageLines),
+        'message_type_id' => CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_EVENTBRITE_API_ERROR,
+      ));
+      throw new CRM_Core_Exception("Eventbrite API error: No response returned. Suspect network connection is down.");
+    }
     $response = json_decode($result, TRUE);
     if ($response == NULL) {
       $response = array();
     }
+
+    if ($error = CRM_Utils_Array::value('error', $response)) {
+      $error_message = CRM_Utils_Array::value('status_code', $response);
+      $error_message .= ': ' . $error;
+      $error_message .= ': ' . CRM_Utils_Array::value('error_description', $response);
+      $messageLines = array(
+        "Eventbrite API error: {$error_message}",
+        "Request URL: $url",
+        "Method: $method",
+        "Body: ". json_encode($body),
+      );
+      CRM_Eventbrite_BAO_EventbriteLog::create(array(
+        'message' => implode("\n", $messageLines),
+        'message_type_id' => CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_EVENTBRITE_API_ERROR,
+      ));
+    }
+
     return $response;
   }
 
