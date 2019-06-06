@@ -208,46 +208,89 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
 
   private function updateContactAddresses() {
     if (!empty($this->attendee['profile']['addresses'])) {
+      // Get active and default locationTypes.
+      $result = _eventbrite_civicrmapi('LocationType', 'get', array(
+        'return' => ["name", "is_default"],
+        'is_active' => 1,
+      ));
+      $locationTypes = CRM_Utils_Array::rekey($result['values'], 'name');
+      $defaultLocationType = array_filter($locationTypes, function($value){
+        return ($value['is_default']);
+      });
+      $defaultLocationTypeId = array_shift(array_keys($defaultLocationType));
+
+      // Loop through all provided addresses. For each, if the location type is
+      // one of our supported locations, queue it up for adding. But onsider
+      // the possibility that a support location type (e.g., "work") may be
+      // disabled in civicrm; in that case we'll try to add this address
+      // with the civicrm-default location type (e.g., "home"). Also consider
+      // that the Attended may specify a "Home" address separately; this case
+      // we risk having two "home" addresses, which is unsupported in
+      // CiviCRM. So in this case, we prefer to use the specified
+      // "Home" address and drop the "Work" address entirely. To manage this,
+      // we need to distinguish between the work-defaulting-to-home address and
+      // the actual-home address, so we collect them separately here, then
+      // merge the arrays together below, thus selecting the specified-home
+      // over the default-to-home.
+      $defaultLocationAddresses = $specifiedLocationAddresses = array();
       foreach ($this->attendee['profile']['addresses'] as $addressType => $address) {
-        $locationTypeId = NULL;
+        $address['ebAddressType'] = $addressType;
+        $supportedLocationTypeId = NULL;
         switch ($addressType) {
           case 'work':
-            $locationTypeId = 'Work';
+            $supportedLocationTypeId = 'Work';
             break;
 
           case 'bill':
-            $locationTypeId = 'Billing';
+            $supportedLocationTypeId = 'Billing';
             break;
 
           case 'home':
-            $locationTypeId = 'Home';
+            $supportedLocationTypeId = 'Home';
             break;
 
         }
-        if ($locationTypeId) {
-          $addresses = _eventbrite_civicrmapi('Address', 'get', array(
-            'return' => array('id'),
-            'location_type_id' => $locationTypeId,
-            'contact_id' => $this->contactId,
-          ), "Processing Attendee {$this->entityId}, attempting to get existing '{$addressType}' address.");
-          if ($addresses['count']) {
-            $addressId = max(array_keys($addresses['values']));
-            if ($addressId) {
-              _eventbrite_civicrmapi('Address', 'delete', array(
-                'id' => $addressId,
-              ), "Processing Attendee {$this->entityId}, attempting to delete existing '{$addressType}' address.");
-            }
+        if ($supportedLocationTypeId) {
+          if (!array_key_exists($supportedLocationTypeId, $locationTypes)) {
+            $defaultLocationAddresses[$defaultLocationTypeId] = $address;
           }
-          $addressCreate = _eventbrite_civicrmapi('Address', 'create', array(
-            'location_type_id' => $locationTypeId,
-            'contact_id' => $this->contactId,
-            'city' => $address['city'],
-            'country' => $address['country'],
-            'state_province' => $address['region'],
-            'postal_code' => $address['postal_code'],
-            'street_address' => $address['address_1'],
-            'supplemental_address_1' => $address['address_2'],
-          ), "Processing Attendee {$this->entityId}, attempting to create new '{$addressType}' address");
+          else {
+            $specifiedLocationAddresses[$supportedLocationTypeId] = $address;
+          }
+        }
+      }
+      $finalAddresses = $specifiedLocationAddresses + $defaultLocationAddresses;
+      // Now we have a final list of address to add. Add them, being sure to
+      // first remove any existing address with that locationType.
+      foreach ($finalAddresses as $locationTypeId => $address) {
+        $addresses = _eventbrite_civicrmapi('Address', 'get', array(
+          'return' => array('id'),
+          'location_type_id' => $locationTypeId,
+          'contact_id' => $this->contactId,
+        ), "Processing Attendee {$this->entityId}, attempting to get existing '{$address['ebAddressType']}' address.");
+        if ($addresses['count']) {
+          $addressId = max(array_keys($addresses['values']));
+          if ($addressId) {
+            _eventbrite_civicrmapi('Address', 'delete', array(
+              'id' => $addressId,
+            ), "Processing Attendee {$this->entityId}, attempting to delete existing '{$address['ebAddressType']}' address.");
+          }
+        }
+        $addressCreate = _eventbrite_civicrmapi('Address', 'create', array(
+          'location_type_id' => $locationTypeId,
+          'contact_id' => $this->contactId,
+          'city' => $address['city'],
+          'country' => $address['country'],
+          'state_province' => $address['region'],
+          'postal_code' => $address['postal_code'],
+          'street_address' => $address['address_1'],
+          'supplemental_address_1' => $address['address_2'],
+        ), "Processing Attendee {$this->entityId}, attempting to create new '{$address['ebAddressType']}' address");
+        if ($addressCreate['id']) {
+          CRM_Eventbrite_BAO_EventbriteLog::create(array(
+            'message' => "Address id '{$addressCreate['id']}' created from EB '{$address['ebAddressType']}' address in Attendee {$this->entityId}.",
+            'message_type_id' => CRM_Eventbrite_BAO_EventbriteLog::MESSAGE_TYPE_ID_GENERAL,
+          ));
         }
       }
     }
