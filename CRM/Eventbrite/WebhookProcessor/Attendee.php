@@ -134,7 +134,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     }
     else {
       // use the lowest duplicatecheck ContactId if any.
-      $this->contactId = min($duplicateCheckContactIds);
+      $this->contactId = empty($duplicateCheckContactIds) ? NULL : min($duplicateCheckContactIds);
       $this->updateContact();
       $this->updateParticipant();
     }
@@ -175,10 +175,11 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       'civicrm_entity_type' => 'ParticipantRole',
       'eb_entity_type' => 'TicketType',
       'eb_entity_id' => CRM_Utils_Array::value('ticket_class_id', $this->attendee),
+      'sequential' => 1,
     ), "Processing Attendee {$this->entityId}, attempting to determine configured RoleID for attendee Ticket Type.");
 
     // If the tickettype is not configured, use the default role for this event:
-    if (!($roleId = CRM_Utils_Array::value('civicrm_entity_id', $role[0]))) {
+    if (!($role['count'] && $roleId = CRM_Utils_Array::value('civicrm_entity_id', $role['values'][0]))) {
       $roleId = _eventbrite_civicrmapi('event', 'getValue', array(
         'return' => 'default_role_id',
         'id' => $this->eventId,
@@ -351,7 +352,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     $parentId = _eventbrite_civicrmapi('EventbriteLink', 'getValue', array(
       'eb_entity_type' => 'Event',
       'civicrm_entity_type' => 'Event',
-      'civicrm_entity_id' => $this->eventId,
+      'eb_entity_id' => CRM_Utils_Array::value('event_id', $this->attendee),
       'return' => 'id',
     ), "Processing Attendee {$this->entityId}, attempting to get eventbrite link ID for event '{$this->eventId}'.");
     $questions = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
