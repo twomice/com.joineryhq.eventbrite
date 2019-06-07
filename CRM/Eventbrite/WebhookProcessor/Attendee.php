@@ -170,13 +170,22 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
   private function updateParticipant() {
 
     // Get role from ticket class.
-    $roleId = _eventbrite_civicrmapi('EventbriteLink', 'getValue', array(
+    $role = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
       'return' => 'civicrm_entity_id',
       'civicrm_entity_type' => 'ParticipantRole',
       'eb_entity_type' => 'TicketType',
       'eb_entity_id' => CRM_Utils_Array::value('ticket_class_id', $this->attendee),
     ), "Processing Attendee {$this->entityId}, attempting to determine configured RoleID for attendee Ticket Type.");
 
+    // If the tickettype is not configured, use the default role for this event:
+    if (!($roleId = CRM_Utils_Array::value('civicrm_entity_id', $role[0]))) {
+      $roleId = _eventbrite_civicrmapi('event', 'getValue', array(
+        'return' => 'default_role_id',
+        'id' => $this->eventId,
+      ));
+    }
+
+    // Create/update the participant record.
     $apiParams = array(
       'id' => $this->participantId,
       'event_id' => $this->eventId,
@@ -185,7 +194,6 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       'role_id' => $roleId,
       'source' => E::ts('Eventbrite Integration'),
     );
-
     if (CRM_Utils_Array::value('checked_in', $this->attendee)) {
       $apiParams['participant_status'] = 'Attended';
     }
@@ -195,7 +203,6 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     else {
       $apiParams['participant_status'] = 'Registered';
     }
-
     $participant = _eventbrite_civicrmapi('Participant', 'create', $apiParams, "Processing Attendee {$this->entityId}, attempting to create/update Participant record.");
 
     $this->participantId = CRM_Utils_Array::value('id', $participant);
@@ -217,7 +224,8 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       $defaultLocationType = array_filter($locationTypes, function($value){
         return ($value['is_default']);
       });
-      $defaultLocationTypeId = array_shift(array_keys($defaultLocationType));
+      $defaultLocationTypeIds = array_keys($defaultLocationType);
+      $defaultLocationTypeId = array_shift($defaultLocationTypeIds);
 
       // Loop through all provided addresses. For each, if the location type is
       // one of our supported locations, queue it up for adding. But onsider
