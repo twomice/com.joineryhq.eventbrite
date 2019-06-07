@@ -37,7 +37,6 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Admin_Form {
         }
       }
       asort($ebEventOptions);
-
       $this->add(
         'select', // field type
         'eb_entity_id', // field name
@@ -58,6 +57,7 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Admin_Form {
       foreach ($result['values'] as $value) {
         $civicrmEventOptions[$value['id']] = $value['title'] . " (ID: {$value['id']})";
       }
+      asort($civicrmEventOptions);
       $this->add(
         'select', // field type
         'civicrm_entity_id', // field name
