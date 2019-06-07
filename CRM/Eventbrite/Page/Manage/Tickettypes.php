@@ -184,7 +184,7 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
       $this->roleLabels[$roleId] = _eventbrite_civicrmapi('OptionValue', 'getvalue', [
         'return' => "label",
         'option_group_id' => "participant_role",
-        'value' => 1,
+        'value' => $roleId,
       ]);
     }
     return $this->roleLabels[$roleId];
