@@ -39,10 +39,109 @@ function eventbrite_civicrm_post($op, $objectName, $objectId, &$objectRef) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pageRun
  */
 function eventbrite_civicrm_pageRun(&$page) {
-  $pageName = $page->getVar('_name');
-  // TODO: on participant and contribution pages, if setting 'eventbrite_is_link_inspect',
-  // display EventbriteLink info with
-  // CRM_Core_Session::setStatus('stuff', E::ts('Eventbrite linked entity'), 'info');
+  // If permission and configs are right, display EventbriteLink data for certain entities.
+  if (
+    CRM_Core_Permission::check('Administer CiviCRM')
+    && _eventbrite_civicrmapi('Setting', 'getvalue', array('name' => "eventbrite_is_link_inspect"))
+  ) {
+    $pageName = $page->getVar('_name');
+
+    $entityPerPage = array(
+      'CRM_Event_Page_Tab' => 'participant',
+      'CRM_Contribute_Page_Tab' => 'contribution',
+      'CRM_Contact_Page_View_Summary' => 'contact',
+    );
+    if ($entity = CRM_Utils_Array::value($pageName, $entityPerPage)) {
+      $ebToken = _eventbrite_civicrmapi('Setting', 'getvalue', array('name' => "eventbrite_api_token"));
+      switch ($entity) {
+        case 'contact':
+          $link = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
+            'civicrm_entity_type' => 'event',
+            'eb_entity_type' => 'event',
+            'options' => array(
+              'limit' => 0,
+            )
+          ));
+          $eventIds = crm_utils_array::collect('civicrm_entity_id', $link['values']);
+
+          $cid = $page->getVar('_contactId');
+          $participant = _eventbrite_civicrmapi('participant', 'get', array(
+            'contact_id' => $cid,
+            'event_id' => array('IN' => $eventIds),
+            'api.EventbriteLink.get' => array(
+              'civicrm_entity_type' => 'participant',
+              'eb_entity_type' => 'attendee',
+              'civicrm_entity_id' => '$value.id',
+            ),
+          ));
+          $participantAttendees = array();
+          foreach ($participant['values'] as $value) {
+            if (!empty($value['api.EventbriteLink.get']['values'][0])) {
+              $pid = $value['api.EventbriteLink.get']['values'][0]['civicrm_entity_id'];
+              $aid = $value['api.EventbriteLink.get']['values'][0]['eb_entity_id'];
+              $participantAttendees[$pid] = $aid;
+            }
+          }
+
+          if (!empty($participantAttendees)) {
+            $msg = E::ts('This contact is linked to Eventbrite Attendees throug participant records:') . '<ul>';
+            foreach ($participantAttendees as $participantId => $attendeeId) {
+              $tsParams = array(
+                '1' => $participantId,
+                '2' => $attendeeId,
+                '3' => CRM_Utils_System::url('civicrm/contact/view/participant', "reset=1&id=$participantId&cid=$cid&action=view&context=participant&selectedChild=event"),
+                '4' => "https://www.eventbriteapi.com/v3/attendees/{$attendeeId}/?token={$ebToken}",
+              );
+              $msg .= '<li>' . E::ts('<a href="%3">Participant %1</a> is linked to <a href="%4" target="_blank">Eventbrite Attendee %2</a>.', $tsParams) . '</li>';
+            }
+            $msg .= '</ul>';
+            CRM_Core_Session::setStatus($msg, E::ts('Eventbrite linked entity'), 'info');
+          }
+          break;
+
+        case 'participant':
+          if ($page->_id) {
+            $link = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
+              'civicrm_entity_type' => 'participant',
+              'eb_entity_type' => 'attendee',
+              'civicrm_entity_id' => $page->_id,
+              'sequential' => 1,
+            ));
+            if(!empty($link['values'][0])) {
+              $attendeeId = $link['values'][0]['eb_entity_id'];
+              $tsParams = array(
+                '1' => $attendeeId,
+                '2' => "https://www.eventbriteapi.com/v3/attendees/{$attendeeId}/?token={$ebToken}",
+              );
+              $msg = E::ts('This participant is linked to <a href="%2" target="_blank">Eventbrite Attendee: %1</a>.', $tsParams);
+              CRM_Core_Session::setStatus($msg, E::ts('Eventbrite linked entity'), 'info', array('expires' => 0));
+            }
+          }
+          break;
+
+        case 'contribution':
+          if ($page->_id) {
+            $link = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
+              'civicrm_entity_type' => 'contribution',
+              'eb_entity_type' => 'order',
+              'civicrm_entity_id' => $page->_id,
+              'sequential' => 1,
+            ));
+            if(!empty($link['values'][0])) {
+              $orderId = $link['values'][0]['eb_entity_id'];
+              $tsParams = array(
+                '1' => $orderId,
+                '2' => "https://www.eventbriteapi.com/v3/orders/{$orderId}/?token={$ebToken}&expand=attendees,attendee-answers",
+
+              );
+              $msg = E::ts('This contribution is linked to <a href="%2" target="_blank">Eventbrite Order: %1</a>.', $tsParams);
+              CRM_Core_Session::setStatus($msg, E::ts('Eventbrite linked entity'), 'info', array('expires' => 0));
+            }
+          }
+          break;
+      }
+    }
+  }
 }
 
 /**
