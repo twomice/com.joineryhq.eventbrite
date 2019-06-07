@@ -229,6 +229,12 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
         // If order status is 'deleted' or 'cancelled'/'refunded', contribution status = cancelled.
         $contributionParams['contribution_status_id'] = 'Cancelled';
       }
+      elseif ($this->order['costs']['gross']['value'] && !$this->order['costs']['payment_fee']['value']) {
+        // If order has a gross total (not just free tickets) but has no payment_fee total,
+        // then we know it was submitted with Eventbrite's "pay later" feature,
+        // so we'll mark the cohtribution as Pending.
+        $contributionParams['contribution_status_id'] = 'Pending';
+      }
 
       // Use contribution.create api to update/create contribution with Order cost data.
       $contribution = _eventbrite_civicrmapi('contribution', 'create', $contributionParams, "Processing Order {$this->entityId}, attempting to create/update contribution record.");
