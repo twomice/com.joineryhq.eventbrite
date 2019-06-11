@@ -1,15 +1,8 @@
 # com.joineryhq.eventbrite
 
-![Screenshot](/images/screenshot.png)
-
-(*FIXME: In one or two paragraphs, describe what the extension does and why one would download it. *)
+Provides synchronization to CiviCRM for participants and payments registered through Eventbrite.
 
 The extension is licensed under [GPL-3.0](LICENSE.txt).
-
-## Requirements
-
-* PHP v5.4+
-* CiviCRM (*FIXME: Version number*)
 
 ## Installation (Web UI)
 
@@ -22,7 +15,7 @@ install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
 cd <extension-dir>
-cv dl com.joineryhq.eventbrite@https://github.com/FIXME/com.joineryhq.eventbrite/archive/master.zip
+cv dl com.joineryhq.eventbrite@https://github.com/twomice/com.joineryhq.eventbrite/archive/master.zip
 ```
 
 ## Installation (CLI, Git)
@@ -31,14 +24,10 @@ Sysadmins and developers may clone the [Git](https://en.wikipedia.org/wiki/Git) 
 install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
-git clone https://github.com/FIXME/com.joineryhq.eventbrite.git
+git clone https://github.com/twomice/com.joineryhq.eventbrite.git
 cv en eventbrite
 ```
 
 ## Usage
 
-(* FIXME: Where would a new user navigate to get started? What changes would they see? *)
-
-## Known Issues
-
-(* FIXME *)
+Configuration options are available at Administer > CiviEvent > Eventbrite Integration
