@@ -456,19 +456,19 @@ function _eventbrite_civix_civicrm_alterSettingsFolders(&$metaDataFolders = NULL
 
 function _eventbrite_civix_civicrm_entityTypes(&$entityTypes) {
   $entityTypes = array_merge($entityTypes, array (
-    'CRM_Eventbrite_DAO_EventbriteLink' =>
+    'CRM_Eventbrite_DAO_EventbriteLink' => 
     array (
       'name' => 'EventbriteLink',
       'class' => 'CRM_Eventbrite_DAO_EventbriteLink',
       'table' => 'civicrm_eventbrite_link',
     ),
-    'CRM_Eventbrite_DAO_EventbriteLog' =>
+    'CRM_Eventbrite_DAO_EventbriteLog' => 
     array (
       'name' => 'EventbriteLog',
       'class' => 'CRM_Eventbrite_DAO_EventbriteLog',
       'table' => 'civicrm_eventbrite_log',
     ),
-    'CRM_Eventbrite_DAO_EventbriteQueue' =>
+    'CRM_Eventbrite_DAO_EventbriteQueue' => 
     array (
       'name' => 'EventbriteQueue',
       'class' => 'CRM_Eventbrite_DAO_EventbriteQueue',

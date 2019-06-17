@@ -103,6 +103,12 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
       $this->_confirmWebhookOnFormLoad();
     }
 
+    $breadCrumb = array(
+      'title' => E::ts('Eventbrite Events'),
+      'url' => CRM_Utils_System::url('civicrm/admin/eventbrite/settings', 'reset=1'),
+    );
+    CRM_Utils_System::appendBreadCrumb(array($breadCrumb));
+
     parent::buildQuickForm();
   }
 

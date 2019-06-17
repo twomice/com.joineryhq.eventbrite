@@ -21,13 +21,19 @@
   <item>
     <path>civicrm/admin/eventbrite/manage/tickettypes</path>
     <page_callback>CRM_Eventbrite_Page_Manage_Tickettypes</page_callback>
-    <title>Eventbrite integration: Ticket Types</title>
+    <title>Eventbrite Integration: Ticket Types</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
   <item>
     <path>civicrm/admin/eventbrite/manage/fields</path>
     <page_callback>CRM_Eventbrite_Page_Manage_Fields</page_callback>
-    <title>Eventbrite integration: Questions</title>
+    <title>Eventbrite Integration: Questions</title>
     <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/admin/eventbrite</path>
+    <page_callback>CRM_Eventbrite_Page_Eventbrite</page_callback>
+    <title>Eventbrite Integration</title>
+    <access_arguments>access CiviCRM</access_arguments>
   </item>
 </menu>

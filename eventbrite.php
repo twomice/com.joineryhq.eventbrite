@@ -60,7 +60,7 @@ function eventbrite_civicrm_pageRun(&$page) {
             'eb_entity_type' => 'event',
             'options' => array(
               'limit' => 0,
-            )
+            ),
           ));
           $eventIds = crm_utils_array::collect('civicrm_entity_id', $link['values']);
 
@@ -107,7 +107,7 @@ function eventbrite_civicrm_pageRun(&$page) {
               'civicrm_entity_id' => $page->_id,
               'sequential' => 1,
             ));
-            if(!empty($link['values'][0])) {
+            if (!empty($link['values'][0])) {
               $attendeeId = $link['values'][0]['eb_entity_id'];
               $tsParams = array(
                 '1' => $attendeeId,
@@ -127,7 +127,7 @@ function eventbrite_civicrm_pageRun(&$page) {
               'civicrm_entity_id' => $page->_id,
               'sequential' => 1,
             ));
-            if(!empty($link['values'][0])) {
+            if (!empty($link['values'][0])) {
               $orderId = $link['values'][0]['eb_entity_id'];
               $tsParams = array(
                 '1' => $orderId,
@@ -313,7 +313,7 @@ function eventbrite_civicrm_navigationMenu(&$menu) {
   _eventbrite_civix_insert_navigation_menu($menu, 'Administer/CiviEvent', array(
     'label' => E::ts('Eventbrite Integration'),
     'name' => 'Eventbrite Integration',
-    'url' => NULL,
+    'url' => 'civicrm/admin/eventbrite',
     'permission' => 'administer CiviCRM',
     'operator' => 'AND',
     'separator' => NULL,
