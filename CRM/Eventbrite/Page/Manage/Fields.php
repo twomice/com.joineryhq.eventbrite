@@ -132,7 +132,7 @@ class CRM_Eventbrite_Page_Manage_Fields extends CRM_Core_Page_Basic {
     $eventTitle = $result['name']['text'];
     $this->assign('eventTitle', $eventTitle);
 
-    CRM_Utils_System::setTitle(E::ts('Eventbrite integration: Questions') . ': ' . $eventTitle);
+    CRM_Utils_System::setTitle(E::ts('Eventbrite Integration: Questions') . ': ' . $eventTitle);
 
   }
 

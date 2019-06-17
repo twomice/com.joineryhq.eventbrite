@@ -131,7 +131,7 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
     $eventTitle = $result['name']['text'];
     $this->assign('eventTitle', $eventTitle);
 
-    CRM_Utils_System::setTitle(E::ts('Eventbrite integration: Ticket Types') . ': ' . $eventTitle);
+    CRM_Utils_System::setTitle(E::ts('Eventbrite Integration: Ticket Types') . ': ' . $eventTitle);
 
   }
 
