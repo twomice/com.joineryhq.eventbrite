@@ -229,12 +229,13 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       $defaultLocationTypeId = array_shift($defaultLocationTypeIds);
 
       // Loop through all provided addresses. For each, if the location type is
-      // one of our supported locations, queue it up for adding. But onsider
-      // the possibility that a support location type (e.g., "work") may be
-      // disabled in civicrm; in that case we'll try to add this address
-      // with the civicrm-default location type (e.g., "home"). Also consider
-      // that the Attended may specify a "Home" address separately; this case
-      // we risk having two "home" addresses, which is unsupported in
+      // one of our supported locations -- and it's otherwise a good address --
+      // queue it up for adding. But onsider the possibility that a supported
+      // location type (e.g., "work") may be disabled in civicrm; in that
+      // case we'll try to add this address with the civicrm-default location
+      // type (e.g., "home").
+      // Also consider that the Attended may specify a "Home" address separately;
+      // this case we risk having two "home" addresses, which is unsupported in
       // CiviCRM. So in this case, we prefer to use the specified
       // "Home" address and drop the "Work" address entirely. To manage this,
       // we need to distinguish between the work-defaulting-to-home address and
@@ -260,6 +261,10 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
 
         }
         if ($supportedLocationTypeId) {
+          if (!self::_addressIsValid($address)) {
+            // This address is poorly formatted or missing important info. Skip it entirely.
+            continue;
+          }
           if (!array_key_exists($supportedLocationTypeId, $locationTypes)) {
             $defaultLocationAddresses[$defaultLocationTypeId] = $address;
           }
@@ -401,6 +406,15 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       $contactValues['id'] = $this->contactId;
       $contact = _eventbrite_civicrmapi('contact', 'create', $contactValues, "Processing Attendee {$this->entityId}, attempting to update contact custom fields.");
     }
+  }
+
+  public static function _addressIsValid($address) {
+    if (empty(CRM_Utils_Array::value('address_1', $address))) {
+      // This address is missing the street component, so it's not valid.
+      // Reference: https://github.com/twomice/com.joineryhq.eventbrite/issues/7
+      return FALSE;
+    }
+    return TRUE;
   }
 
 }
