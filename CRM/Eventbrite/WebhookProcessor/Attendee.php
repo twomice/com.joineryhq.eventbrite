@@ -223,7 +223,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       ));
       $locationTypes = CRM_Utils_Array::rekey($result['values'], 'name');
       $defaultLocationType = array_filter($locationTypes, function($value){
-        return ($value['is_default']);
+        return (CRM_Utils_Array::value('is_default', $value, 0));
       });
       $defaultLocationTypeIds = array_keys($defaultLocationType);
       $defaultLocationTypeId = array_shift($defaultLocationTypeIds);
