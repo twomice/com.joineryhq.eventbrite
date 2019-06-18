@@ -239,7 +239,12 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
         // - order is refunded to an amount smaller than the EB fees.
         // - order is finally synced for the first time to CiviCRM.
         //
-        $contributionParams['contribution_status_id'] = 'Pending';
+        if (empty($contributionParams['id'])) {
+          // And, we only want to do this if it's a newly created contribution;
+          // there's really no time when we'd be setting an existing contrib
+          // to 'pending'.
+          $contributionParams['contribution_status_id'] = 'Pending';
+        }
       }
 
       // Use contribution.create api to update/create contribution with Order cost data.
