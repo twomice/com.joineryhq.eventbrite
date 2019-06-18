@@ -40,6 +40,12 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       return;
     }
 
+    // Ensure we have a valid participant role based on Attendee ticket class.
+    // Otherwise, just skip this Attendee.
+    if (!self::getRolePerTicketType(CRM_Utils_Array::value('ticket_class_id', $this->attendee))) {
+      return;
+    }
+
     /*
      * Now that we have the latest Attendee data, the basic idea is to do this:
      *
@@ -164,23 +170,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
   }
 
   private function updateParticipant() {
-
-    // Get role from ticket class.
-    $role = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
-      'return' => 'civicrm_entity_id',
-      'civicrm_entity_type' => 'ParticipantRole',
-      'eb_entity_type' => 'TicketType',
-      'eb_entity_id' => CRM_Utils_Array::value('ticket_class_id', $this->attendee),
-      'sequential' => 1,
-    ), "Processing Attendee {$this->entityId}, attempting to determine configured RoleID for attendee Ticket Type.");
-
-    // If the tickettype is not configured, use the default role for this event:
-    if (!($role['count'] && $roleId = CRM_Utils_Array::value('civicrm_entity_id', $role['values'][0]))) {
-      $roleId = _eventbrite_civicrmapi('event', 'getValue', array(
-        'return' => 'default_role_id',
-        'id' => $this->eventId,
-      ));
-    }
+    $roleId = self::getRolePerTicketType(CRM_Utils_Array::value('ticket_class_id', $this->attendee));
 
     // Create/update the participant record.
     $apiParams = array(
@@ -327,6 +317,27 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
         'phone' => $phone,
       ), "Processing Attendee {$this->entityId}, attempting to create new existing '{$locationType}' phone.");
     }
+  }
+
+  public static function getRolePerTicketType($ticketClassId, $attendeeId = NULL) {
+    static $roleIds = array();
+    if (!isset($roleIds[$ticketClassId])) {
+      $roleIds[$ticketClassId] = NULL;
+
+      // Get role from ticket class.
+      $role = _eventbrite_civicrmapi('EventbriteLink', 'get', array(
+        'return' => 'civicrm_entity_id',
+        'civicrm_entity_type' => 'ParticipantRole',
+        'eb_entity_type' => 'TicketType',
+        'eb_entity_id' => $ticketClassId,
+        'sequential' => 1,
+      ), "Processing Attendee '{$attendeeId}', attempting to determine configured RoleID for attendee Ticket Type ID " . $ticketClassId);
+
+      if ($role['count']) {
+        $roleIds[$ticketClassId] = CRM_Utils_Array::value('civicrm_entity_id', $role['values'][0]);
+      }
+    }
+    return $roleIds[$ticketClassId];
   }
 
   public static function setParticipantStatusRemoved($participantId) {

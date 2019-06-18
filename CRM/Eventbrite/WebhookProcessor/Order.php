@@ -76,8 +76,18 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
 
     $existingPrimaryParticipantId = $existingPrimaryParticipantLinkId = NULL;
 
-    // Determine a list of OrderAttendeeIds.
-    $orderAttendees = CRM_Utils_Array::rekey($this->order['attendees'], 'id');
+    // Determine a list of OrderAttendeeIds, for Attendees with valid Ticket Types.
+    $orderAttendees = array();
+    foreach ($this->order['attendees'] as $attendee) {
+      if (CRM_Eventbrite_WebhookProcessor_Attendee::getRolePerTicketType(CRM_Utils_Array::value('ticket_class_id', $attendee))) {
+        $orderAttendees[$attendee['id']] = $attendee;
+      }
+    }
+    if (empty($orderAttendees)) {
+      // If there are no order Attendees with valid Ticket Types, there's nothing
+      // we can do with this order, so just return.
+      return;
+    }
     $orderAttendeeIds = array_keys($orderAttendees);
 
     // Determine existingPrimaryParticipantId for order via eventbritelink, if any (must be an existing participant record)
@@ -135,6 +145,14 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
 
     // Start with an empty list of OrderParticipantIds
     $orderParticipantIds = array();
+    // Also start with 0 for sum amounts on orderAttendee gross and fees.
+    // (We can't use these amounts from the Order itself, because some Attendees
+    // may be of invalid Ticket Types, in which case at least part of the order
+    // total could be for Attendees that dont' get synced into Participants, thus
+    // creating a discrepancy between contribution amounts and expected totals for
+    // all participants.
+    $grossSum = $feesSum = 0;
+
     foreach ($orderAttendees as $orderAttendeeId => $orderAttendee) {
       // For each attendee in OrderAttendeeIds:
       // if linked via EventbriteLink to an existing Participant, add pid to OrderParticipantIds
@@ -154,6 +172,11 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
         // get the linked pid for that attendee, and add pid to OrderParticipantIds
         $orderParticipantIds[] = $attendeeProcessor->get('participantId');
       }
+
+      // Add to gross and fee totals for this Attendee.
+      $grossSum += $orderAttendee['costs']['gross']['major_value'];
+      $feesSum += $orderAttendee['costs']['eventbrite_fee']['major_value'];
+      $feesSum += $orderAttendee['costs']['payment_fee']['major_value'];
     }
     // Determine lowest AttendeeId in order; this is PrimaryAttendeeId.
     $primaryAttendeeId = min($orderAttendeeIds);
@@ -196,9 +219,8 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
       // Define contribution params based on Order.costs
       $contributionParams = array(
         'receive_date' => CRM_Utils_Date::processDate(CRM_Utils_Array::value('created', $this->order)),
-        'total_amount' => $this->order['costs']['gross']['major_value'],
-        'total_amount' => $this->order['costs']['gross']['major_value'],
-        'fee_amount' => ($this->order['costs']['eventbrite_fee']['major_value'] + $this->order['costs']['payment_fee']['major_value']),
+        'total_amount' => $grossSum,
+        'fee_amount' => $feesSum,
         'financial_type_id' => $financialTypeId,
         'source' => E::ts('Eventbrite Integration'),
         'contact_id' => $contactId,

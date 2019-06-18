@@ -3,7 +3,7 @@
 {else}
 
   <div class="help">
-    <p>{ts 1=$eventTitle}Manage Eventbrite Ticket Types for the event <em>%1</em>.{/ts}</p>
+    <p>{ts 1=$eventTitle}Manage Eventbrite Ticket Types for the event <em>%1</em>. Any Ticket Types not configured here will be ignored when syncing Attendees and Orders from Eventbrite.{/ts}</p>
   </div>
 
   <div class="crm-content-block crm-block">
