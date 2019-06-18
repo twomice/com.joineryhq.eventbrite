@@ -59,11 +59,10 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
      *        create a new contact and use that contactId (source = "synced from EventBrite")
      *      Update the linked Participant status to 'removed in EB'
      *      Create a new Participant record contactId for this event; use this ParticipantId.
-     *    Unlink the linked participant (yes, unconditionally; we'll unconditionally create a new link in a moment)
      *  Else,
      *    create a new contact and use that contactId (source = "synced from EventBrite")
      *    create a new participant record
-     *  Create a new Participant/Attendee link using ParticipantId with the latest Attendee data.
+     *  Create/update Participant/Attendee link using ParticipantId with the latest Attendee data.
      *  Now we should know the contactId, and Contact record has been updated; we also know the ParticipantId and Participant record has been updated.
      *  Update any configured custom fields.
      */
@@ -127,10 +126,6 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
         // Create a new Participant record contactId for this event; use this ParticipantId.
         $this->updateParticipant();
       }
-      // Unlink the linked participant (yes, unconditionally; we'll unconditionally create a new link in a moment)
-      _eventbrite_civicrmapi('EventbriteLink', 'delete', array(
-        'id' => $linkId,
-      ), "Processing Attendee {$this->entityId}, attempting to delete Attendee/Participant link.");
     }
     else {
       // use the lowest duplicatecheck ContactId if any.
@@ -140,11 +135,12 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     }
     // Create a new Participant/Attendee link using ParticipantId with the latest Attendee data.
     $link = _eventbrite_civicrmapi('EventbriteLink', 'create', array(
+      'id' => $linkId,
       'eb_entity_type' => 'Attendee',
       'civicrm_entity_type' => 'Participant',
       'eb_entity_id' => $this->entityId,
       'civicrm_entity_id' => $this->participantId,
-    ), "Processing Attendee {$this->entityId}, attempting to create new Attendee/Participant link.");
+    ), "Processing Attendee {$this->entityId}, attempting to create/update Attendee/Participant link.");
     // Now we should know the contactId, and Contact record has been updated; we also know the ParticipantId and Participant record has been updated.
     $this->updateCustomFields();
   }

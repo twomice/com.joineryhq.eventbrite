@@ -71,8 +71,7 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
      * Determine linked pid for PrimaryAttendeeId; this is PrimaryParticipantId
      * For each pid in OrderParticipantIds, set registered_by_id = PrimaryParticipantId
      *
-     * Delete any existing link for existingPrimaryParticipantId
-     * Create new link for PrimaryParticipantId
+     * Create/update link for PrimaryParticipantId
      */
 
     $existingPrimaryParticipantId = $existingPrimaryParticipantLinkId = NULL;
@@ -172,19 +171,14 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
         'registered_by_id' => $primaryParticipantId,
       ), "Processing Order {$this->entityId}, attempting to associate participant '$orderParticipantId' with order primary participant '$primaryParticipantId'.");
     }
-    // Delete any existing link for existingPrimaryParticipantId
-    if ($existingPrimaryParticipantLinkId) {
-      _eventbrite_civicrmapi('EventbriteLink', 'delete', array(
-        'id' => $existingPrimaryParticipantLinkId,
-      ), "Processing Order {$this->entityId}, attempting to delete PrimaryParticipant link for this order.");
-    }
-    // Create new link for PrimaryParticipantId
+    // Create/update link for PrimaryParticipantId
     _eventbrite_civicrmapi('EventbriteLink', 'create', array(
+      'id' => $existingPrimaryParticipantLinkId,
       'eb_entity_type' => 'Order',
       'civicrm_entity_type' => 'PrimaryParticipant',
       'eb_entity_id' => $this->entityId,
       'civicrm_entity_id' => $primaryParticipantId,
-    ), "Processing Order {$this->entityId}, attempting to create a new PrimaryParticipant link for this order.");
+    ), "Processing Order {$this->entityId}, attempting to create/update PrimaryParticipant link for this order.");
 
     // Handle contributions, but only if event is configured as is_monetary.
     $event = _eventbrite_civicrmapi('Event', 'getSingle', array(
@@ -220,9 +214,6 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
       $linkId = CRM_Utils_Array::value('id', $link);
       if ($linkId) {
         $contributionParams['id'] = CRM_Utils_Array::value('civicrm_entity_id', $link['values'][0]);
-        _eventbrite_civicrmapi('EventbriteLink', 'delete', array(
-          'id' => $linkId,
-        ), "Processing Order {$this->entityId}, attempting to delete existing Contribution/Order link.");
       }
       $orderStatus = CRM_Utils_Array::value('status', $this->order);
       if (in_array($orderStatus, array('refunded', 'cancelled', 'deleted'))) {
@@ -256,11 +247,12 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
 
       // Create new link between Order and ContributionId.
       _eventbrite_civicrmapi('EventbriteLink', 'create', array(
+        'id' => $linkId,
         'civicrm_entity_type' => 'Contribution',
         'civicrm_entity_id' => $contribution['id'],
         'eb_entity_type' => 'Order',
         'eb_entity_id' => $this->entityId,
-      ), "Processing Order {$this->entityId}, attempting to create new Order/Contribution link.");
+      ), "Processing Order {$this->entityId}, attempting to create/update Order/Contribution link.");
     }
 
   }
