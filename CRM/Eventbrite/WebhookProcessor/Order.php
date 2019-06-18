@@ -229,10 +229,25 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
         // If order status is 'deleted' or 'cancelled'/'refunded', contribution status = cancelled.
         $contributionParams['contribution_status_id'] = 'Cancelled';
       }
-      elseif ($this->order['costs']['gross']['value'] && !$this->order['costs']['payment_fee']['value']) {
-        // If order has a gross total (not just free tickets) but has no payment_fee total,
-        // then we know it was submitted with Eventbrite's "pay later" feature,
-        // so we'll mark the cohtribution as Pending.
+      elseif (
+        $this->order['costs']['eventbrite_fee']['value']
+        && $this->order['costs']['base_price']['value']
+        && !$this->order['costs']['payment_fee']['value']
+      ) {
+        // A pay_by_check order must have base amount > 0, eventbrite fee > 0,
+        // and payment_fee = 0.
+        //
+        // However, it is possible to refund a CC-paid order down so low that these
+        // conditions are met; in this case the order will appear to be pay_by_check,
+        // and if the contribution has not yet beeen created by this point, it
+        // will be created with a 'Pending' status. This seems fairly unlikely,
+        // as you'd need an unusual sequence of events:
+        // - order is placed and paid with CC
+        // - order is NOT synced to CiviCRM, either because of some unexpected
+        //   delay, or because the following steps just happen too quickly.
+        // - order is refunded to an amount smaller than the EB fees.
+        // - order is finally synced for the first time to CiviCRM.
+        //
         $contributionParams['contribution_status_id'] = 'Pending';
       }
 
