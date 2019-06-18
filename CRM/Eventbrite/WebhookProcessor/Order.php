@@ -250,6 +250,12 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
       // Use contribution.create api to update/create contribution with Order cost data.
       $contribution = _eventbrite_civicrmapi('contribution', 'create', $contributionParams, "Processing Order {$this->entityId}, attempting to create/update contribution record.");
 
+      // Link primary participant to contribution as participantPayment.
+      $participantPayment = _eventbrite_civicrmapi('ParticipantPayment', 'create', array(
+        'participant_id' => $primaryParticipantId,
+        'contribution_id' => $contribution['id'],
+      ));
+
       // Create new link between Order and ContributionId.
       _eventbrite_civicrmapi('EventbriteLink', 'create', array(
         'id' => $linkId,
