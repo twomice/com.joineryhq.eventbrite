@@ -105,6 +105,12 @@ class CRM_Eventbrite_Page_Manage_Events extends CRM_Core_Page_Basic {
     $eb = CRM_Eventbrite_EvenbriteApi::singleton();
     foreach ($rows as &$row) {
       $event = $eb->request("/events/{$row['eb_entity_id']}/");
+      if (empty($event['name'])) {
+        // The configured event was apparently not found in EB, so just skip it.
+        // It will appear without an EB name in the table, but that's inevitable
+        // since we can't find the actual EB name.
+        continue;
+      }
       $row['eb_event_name'] = CRM_Utils_Array::value('text', $event['name']);
     }
     $this->assign('rows', $rows);
