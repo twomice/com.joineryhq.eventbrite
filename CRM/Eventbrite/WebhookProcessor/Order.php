@@ -222,6 +222,7 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
         'total_amount' => $grossSum,
         'fee_amount' => $feesSum,
         'financial_type_id' => $financialTypeId,
+        'payment_instrument_id' => 'Credit Card',
         'source' => E::ts('Eventbrite Integration'),
         'contact_id' => $contactId,
       );
@@ -265,6 +266,7 @@ class CRM_Eventbrite_WebhookProcessor_Order extends CRM_Eventbrite_WebhookProces
           // And, we only want to do this if it's a newly created contribution;
           // there's really no time when we'd be setting an existing contrib
           // to 'pending'.
+          $contributionParams['payment_instrument_id'] = 'Check';
           $contributionParams['contribution_status_id'] = 'Pending';
         }
       }
