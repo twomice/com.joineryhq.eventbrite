@@ -348,7 +348,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
     $this->cancelParticipantPayments($participantId);
   }
 
-  private function cancelParticipantPayments($participantId) {
+  public static function cancelParticipantPayments($participantId) {
     $participantPayments = _eventbrite_civicrmapi('participantPayment', 'get', array(
       'participant_id' => $participantId,
     ), "Processing Attendee {$this->entityId}, attempting to get existing contribution.");
