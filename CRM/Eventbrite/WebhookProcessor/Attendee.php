@@ -196,7 +196,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
 
     // If participant status is canceled, also cancel the payment record.
     if ($apiParams['participant_status'] == 'Cancelled') {
-      $this->cancelParticipantPayments($participant['id']);
+      self::cancelParticipantPayments($participant['id']);
     }
   }
 
@@ -345,7 +345,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       'id' => $participantId,
       'participant_status' => 'Removed_in_EventBrite',
     ), "Processing Participant {$participantId}, attempting to mark participant as 'Removed in Eventbrite'.");
-    $this->cancelParticipantPayments($participantId);
+    self::cancelParticipantPayments($participantId);
   }
 
   public static function cancelParticipantPayments($participantId) {
