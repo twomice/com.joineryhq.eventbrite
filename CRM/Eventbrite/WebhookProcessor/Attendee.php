@@ -351,12 +351,12 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
   public static function cancelParticipantPayments($participantId) {
     $participantPayments = _eventbrite_civicrmapi('participantPayment', 'get', array(
       'participant_id' => $participantId,
-    ), "Processing Attendee {$this->entityId}, attempting to get existing contribution.");
+    ), "Processing Participant {$participantId}, attempting to get existing contribution.");
     foreach ($participantPayment['values'] as $value) {
       _eventbrite_civicrmapi('contribution', 'create', array(
         'id' => $value['contribution_id'],
         'contribution_status_id' => 'cancelled',
-      ), "Processing Attendee {$this->entityId}, attempting to get cancel existing contribution.");
+        ), "Processing Participant {$participantId}, attempting to get existing contribution.");
     }
   }
 
