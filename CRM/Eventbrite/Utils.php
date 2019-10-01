@@ -7,7 +7,7 @@
  */
 class CRM_Eventbrite_Utils {
   static public function getWebhookListenerUrl() {
-    return CRM_Utils_System::url('civicrm/eventbrite/webhook', NULL, TRUE);
+    return CRM_Utils_System::url('civicrm/eventbrite/webhook', NULL, TRUE, NULL, NULL, TRUE, NULL);
   }
 
 }
