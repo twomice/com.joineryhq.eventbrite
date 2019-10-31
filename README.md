@@ -33,3 +33,5 @@ cv en eventbrite
 Configuration options are available at Administer > CiviEvent > Eventbrite Integration
 
 * The extension asks for your "Personal OAuth Token"; this may also be called the "Private API key" under the properties of the API Key in your [Evenbrite account settings](https://www.eventbrite.com/account-settings/apps).
+
+To test, run the Scheduled Job called Call Eventbrite.Runqueue API manually. 
