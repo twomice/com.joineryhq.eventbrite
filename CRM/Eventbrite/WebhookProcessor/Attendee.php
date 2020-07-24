@@ -208,7 +208,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
         'is_active' => 1,
       ));
       $locationTypes = CRM_Utils_Array::rekey($result['values'], 'name');
-      $defaultLocationType = array_filter($locationTypes, function($value){
+      $defaultLocationType = array_filter($locationTypes, function($value) {
         return (CRM_Utils_Array::value('is_default', $value, 0));
       });
       $defaultLocationTypeIds = array_keys($defaultLocationType);
@@ -356,7 +356,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       _eventbrite_civicrmapi('contribution', 'create', array(
         'id' => $value['contribution_id'],
         'contribution_status_id' => 'cancelled',
-        ), "Processing Participant {$participantId}, attempting to get existing contribution.");
+      ), "Processing Participant {$participantId}, attempting to get existing contribution.");
     }
   }
 

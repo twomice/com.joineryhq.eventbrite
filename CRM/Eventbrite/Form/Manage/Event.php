@@ -9,6 +9,7 @@
 use CRM_Eventbrite_ExtensionUtil as E;
 
 class CRM_Eventbrite_Form_Manage_Event extends CRM_Admin_Form {
+
   /**
    * Explicitly declare the entity api name.
    */
@@ -38,11 +39,16 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Admin_Form {
       }
       asort($ebEventOptions);
       $this->add(
-        'select', // field type
-        'eb_entity_id', // field name
-        E::ts('Evenbrite Event'), // field label
-        $ebEventOptions, // list of options
-        TRUE // is required
+        // field type
+        'select',
+        // field name
+        'eb_entity_id',
+        // field label
+        E::ts('Evenbrite Event'),
+        // list of options
+        $ebEventOptions,
+        // is required
+        TRUE
       );
 
       // Get all active civicrm events
@@ -59,11 +65,16 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Admin_Form {
       }
       asort($civicrmEventOptions);
       $this->add(
-        'select', // field type
-        'civicrm_entity_id', // field name
-        E::ts('CiviCRM Event'), // field label
-        $civicrmEventOptions, // list of options
-        TRUE // is required
+        // field type
+        'select',
+        // field name
+        'civicrm_entity_id',
+        // field label
+        E::ts('CiviCRM Event'),
+        // list of options
+        $civicrmEventOptions,
+        // is required
+        TRUE
       );
 
     }
@@ -112,7 +123,6 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Admin_Form {
     }
     CRM_Core_Session::setStatus(ts('Settings have been saved.'), ts('Saved'), 'success');
   }
-
 
   /**
    * Get the fields/elements defined in this form.

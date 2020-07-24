@@ -281,10 +281,10 @@ function eventbrite_civicrm_entityTypes(&$entityTypes) {
  * Implements hook_civicrm_preProcess().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
- *
-function eventbrite_civicrm_preProcess($formName, &$form) {
+ */
+// function eventbrite_civicrm_preProcess($formName, &$form) {
 
-} // */
+// } // */
 
 /**
  * For an array of menu items, recursively get the value of the greatest navID

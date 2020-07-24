@@ -11,17 +11,19 @@ class CRM_Eventbrite_Page_Manage_Tickettypes extends CRM_Core_Page_Basic {
 
   /**
    * @inheritDoc
+   * @var bool
    */
   public $useLivePageJS = TRUE;
 
   /**
    * @inheritDoc
+   * @var string
    */
-  static $_links = NULL;
-
+  public static $_links = NULL;
 
   /**
    * @inheritDoc
+   * @var string
    */
   public function getBAOName() {
     return 'CRM_Eventbrite_BAO_EventbriteLink_Tickettype';

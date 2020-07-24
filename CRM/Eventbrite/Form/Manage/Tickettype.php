@@ -68,18 +68,28 @@ class CRM_Eventbrite_Form_Manage_Tickettype extends CRM_Admin_Form {
       }
       if (empty($emptyOptionsMessage)) {
         $this->add(
-          'select', // field type
-          'eb_entity_id', // field name
-          E::ts('Evenbrite Ticket Type'), // field label
-          $ebTicketTypeOptions, // list of options
-          TRUE // is required
+          // field type
+          'select',
+          // field name
+          'eb_entity_id',
+          // field label
+          E::ts('Evenbrite Ticket Type'),
+          // list of options
+          $ebTicketTypeOptions,
+          // is required
+          TRUE
         );
         $this->add(
-          'select', // field type
-          'civicrm_entity_id', // field name
-          E::ts('CiviCRM Role'), // field label
-          $civicrmRoleOptions, // list of options
-          TRUE // is required
+          // field type
+          'select',
+          // field name
+          'civicrm_entity_id',
+          // field label
+          E::ts('CiviCRM Role'),
+          // list of options
+          $civicrmRoleOptions,
+          // is required
+          TRUE
         );
       }
       else {
@@ -133,7 +143,6 @@ class CRM_Eventbrite_Form_Manage_Tickettype extends CRM_Admin_Form {
     }
     CRM_Core_Session::setStatus(ts('Settings have been saved.'), ts('Saved'), 'success');
   }
-
 
   /**
    * Get the fields/elements defined in this form.
