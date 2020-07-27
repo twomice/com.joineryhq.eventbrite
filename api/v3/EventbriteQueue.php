@@ -1,5 +1,5 @@
 <?php
-// use CRM_Eventbrite_ExtensionUtil as E;
+use CRM_Eventbrite_ExtensionUtil as E;
 
 /**
  * EventbriteQueue.create API specification (optional)

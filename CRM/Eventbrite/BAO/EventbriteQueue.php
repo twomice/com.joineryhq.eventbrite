@@ -1,8 +1,6 @@
 <?php
+use CRM_Eventbrite_ExtensionUtil as E;
 
-/**
- * use CRM_Eventbrite_ExtensionUtil as E;
- */
 class CRM_Eventbrite_BAO_EventbriteQueue extends CRM_Eventbrite_DAO_EventbriteQueue {
 
   const STATUS_ID_NEW = 1;

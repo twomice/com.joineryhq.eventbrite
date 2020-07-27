@@ -1,8 +1,6 @@
 <?php
+use CRM_Eventbrite_ExtensionUtil as E;
 
-/**
- * use CRM_Eventbrite_ExtensionUtil as E;
- */
 class CRM_Eventbrite_BAO_EventbriteLog extends CRM_Eventbrite_DAO_EventbriteLog {
 
   const MESSAGE_TYPE_ID_INBOUND_WEBHOOK = 1;

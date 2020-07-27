@@ -1,5 +1,5 @@
 <?php
-// use CRM_Eventbrite_ExtensionUtil as E;
+use CRM_Eventbrite_ExtensionUtil as E;
 
 /**
  * EventbriteLog.create API specification (optional)
