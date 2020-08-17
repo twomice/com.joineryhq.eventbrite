@@ -13,8 +13,8 @@ use CRM_Eventbrite_ExtensionUtil as E;
  */
 class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
 
-  static $settingFilter = array('group' => 'eventbrite');
-  static $extensionName = 'com.joineryhq.eventbrite';
+  public static $settingFilter = array('group' => 'eventbrite');
+  public static $extensionName = 'com.joineryhq.eventbrite';
   private $_submittedValues = array();
   private $_settings = array();
 
@@ -36,25 +36,32 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
         switch ($setting['html_type']) {
           case 'Select':
             $this->add(
-              $setting['html_type'], // field type
-              $setting['name'], // field name
-              $setting['title'], // field label
+              // field type
+              $setting['html_type'],
+              // field name
+              $setting['name'],
+              // field label
+              $setting['title'],
               $this->getSettingOptions($setting), NULL, $setting['html_attributes']
             );
             break;
 
           case 'CheckBox':
             $this->addCheckBox(
-              $setting['name'], // field name
-              $setting['title'], // field label
+              // field name
+              $setting['name'],
+              // field label
+              $setting['title'],
               array_flip($this->getSettingOptions($setting))
             );
             break;
 
           case 'Radio':
             $this->addRadio(
-              $setting['name'], // field name
-              $setting['title'], // field label
+              // field name
+              $setting['name'],
+              // field label
+              $setting['title'],
               $this->getSettingOptions($setting)
             );
             break;

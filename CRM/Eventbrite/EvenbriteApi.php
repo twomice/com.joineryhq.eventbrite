@@ -83,7 +83,7 @@ class CRM_Eventbrite_EvenbriteApi {
         "Eventbrite API error: No response returned. Suspect network connection is down.",
         "Request URL: $url",
         "Method: $method",
-        "Body: ". json_encode($body),
+        "Body: " . json_encode($body),
         "API called from: $error_location",
       );
       CRM_Eventbrite_BAO_EventbriteLog::create(array(
@@ -105,7 +105,7 @@ class CRM_Eventbrite_EvenbriteApi {
         "Eventbrite API error: {$error_message}",
         "Request URL: $url",
         "Method: $method",
-        "Body: ". json_encode($body),
+        "Body: " . json_encode($body),
       );
       CRM_Eventbrite_BAO_EventbriteLog::create(array(
         'message' => implode("\n", $messageLines),

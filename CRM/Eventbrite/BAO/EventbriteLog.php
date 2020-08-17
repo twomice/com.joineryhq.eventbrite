@@ -7,8 +7,8 @@ class CRM_Eventbrite_BAO_EventbriteLog extends CRM_Eventbrite_DAO_EventbriteLog 
   const MESSAGE_TYPE_ID_EVENTBRITE_ERROR = 2;
   const MESSAGE_TYPE_ID_CIVICRM_ERROR = 3;
   const MESSAGE_TYPE_ID_GENERAL = 4;
-  const MESSAGE_TYPE_ID_CIVICRM_API_ERROR= 5;
-  const MESSAGE_TYPE_ID_EVENTBRITE_API_ERROR= 6;
+  const MESSAGE_TYPE_ID_CIVICRM_API_ERROR = 5;
+  const MESSAGE_TYPE_ID_EVENTBRITE_API_ERROR = 6;
 
   /**
    * Create a new EventbriteLog based on array-data

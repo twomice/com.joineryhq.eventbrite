@@ -106,19 +106,29 @@ class CRM_Eventbrite_Form_Manage_Field extends CRM_Admin_Form {
       }
       if (empty($emptyOptionsMessage)) {
         $this->add(
-          'select', // field type
-          'eb_entity_id', // field name
-          E::ts('Evenbrite Question'), // field label
-          $ebFieldOptions, // list of options
-          TRUE // is required
+          // field type
+          'select',
+          // field name
+          'eb_entity_id',
+          // field label
+          E::ts('Evenbrite Question'),
+          // list of options
+          $ebFieldOptions,
+          // is required
+          TRUE
         );
 
         $this->add(
-          'select', // field type
-          'civicrm_entity_id', // field name
-          E::ts('CiviCRM Custom Field'), // field label
-          $civicrmFieldOptions, // list of options
-          TRUE // is required
+          // field type
+          'select',
+          // field name
+          'civicrm_entity_id',
+          // field label
+          E::ts('CiviCRM Custom Field'),
+          // list of options
+          $civicrmFieldOptions,
+          // is required
+          TRUE
         );
       }
       else {
@@ -171,7 +181,6 @@ class CRM_Eventbrite_Form_Manage_Field extends CRM_Admin_Form {
     }
     CRM_Core_Session::setStatus(ts('Settings have been saved.'), ts('Saved'), 'success');
   }
-
 
   /**
    * Get the fields/elements defined in this form.
