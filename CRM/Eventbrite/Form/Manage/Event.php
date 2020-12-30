@@ -22,7 +22,7 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Admin_Form {
     $descriptions = array();
 
     if ($this->_action & CRM_Core_Action::DELETE) {
-      $descriptions['delete_warning'] = ts('Are you sure you want to delete this configuration?');
+      $descriptions['delete_warning'] = E::ts('Are you sure you want to delete this configuration?');
     }
     else {
       $civicrmEventOptions = $ebEventOptions = array('' => '');
@@ -121,7 +121,7 @@ class CRM_Eventbrite_Form_Manage_Event extends CRM_Admin_Form {
       }
       $result = _eventbrite_civicrmapi('EventbriteLink', 'create', $apiParams);
     }
-    CRM_Core_Session::setStatus(ts('Settings have been saved.'), ts('Saved'), 'success');
+    CRM_Core_Session::setStatus(E::ts('Settings have been saved.'), E::ts('Saved'), 'success');
   }
 
   /**

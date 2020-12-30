@@ -69,16 +69,16 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
           default:
             $add = 'add' . $setting['quick_form_type'];
             if ($add == 'addElement') {
-              $this->$add($setting['html_type'], $name, ts($setting['title']), CRM_Utils_Array::value('html_attributes', $setting, array()));
+              $this->$add($setting['html_type'], $name, E::ts($setting['title']), CRM_Utils_Array::value('html_attributes', $setting, array()));
             }
             else {
-              $this->$add($name, ts($setting['title']));
+              $this->$add($name, E::ts($setting['title']));
             }
             break;
 
         }
       }
-      $descriptions[$setting['name']] = ts($setting['description']);
+      $descriptions[$setting['name']] = E::ts($setting['description']);
 
       if (!empty($setting['X_form_rules_args'])) {
         $rules_args = (array) $setting['X_form_rules_args'];
@@ -93,7 +93,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
     $this->addButtons(array(
       array(
         'type' => 'submit',
-        'name' => ts('Submit'),
+        'name' => E::ts('Submit'),
         'isDefault' => TRUE,
       ),
     ));
@@ -182,7 +182,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
       ));
     }
 
-    CRM_Core_Session::setStatus(" ", ts('Settings saved.'), "success");
+    CRM_Core_Session::setStatus(" ", E::ts('Settings saved.'), "success");
   }
 
   /**
@@ -212,7 +212,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
       $options[$id] = $value['title'];
     }
     asort($options);
-    $options = array(0 => '- ' . ts('none') . ' -') + $options;
+    $options = array(0 => '- ' . E::ts('none') . ' -') + $options;
     return $options;
   }
 
