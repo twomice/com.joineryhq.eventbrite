@@ -12,13 +12,13 @@ class CRM_Eventbrite_Page_Eventbrite extends CRM_Core_Page {
 
     $links = array(
       array(
-        'icon' => '',
+        'icon' => 'fa-cogs',
         'url' => CRM_Utils_System::url('civicrm/admin/eventbrite/settings', 'reset=1'),
         'title' => E::ts('Settings'),
         'desc' => E::ts('Eventbrite API key; debug settings.'),
       ),
       array(
-        'icon' => 'admin/small/event_manage.png',
+        'icon' => 'fa-calendar-check-o',
         'url' => CRM_Utils_System::url('civicrm/admin/eventbrite/manage/events'),
         'title' => E::ts('Events'),
         'desc' => E::ts('Configurations for specific events.'),
