@@ -72,8 +72,18 @@ class CRM_Eventbrite_EvenbriteApi {
       $url .= '&expand=' . implode(',', $expand);
     }
 
-    $context = stream_context_create($options);
-    $result = @file_get_contents($url, FALSE, $context);
+  // Display 100 events ordered by start date asc. on Add Event page.
+  if ( preg_match( '/\/organizations\/[0-9]+\/events\//', $path ) ) {
+	  $url .= '&order_by=start_desc&page_size=100';
+  }
+
+  $context = stream_context_create($options);
+  if ( 'GET' == $method ) {
+	  $result = @file_get_contents($url);
+  } else {
+	  $result = @file_get_contents($url, FALSE, $context);
+  }
+
     // Log error if $result is null, probably network is unreachable.
     if ($result == NULL) {
       $bt = debug_backtrace();
