@@ -398,8 +398,7 @@ class CRM_Eventbrite_WebhookProcessor_Attendee extends CRM_Eventbrite_WebhookPro
       $extends = $field['api.CustomGroup.getsingle']['extends'];
       if ($extends == 'Individual' || $extends == 'Contact') {
         $contactValues['custom_' . $fieldId] = $answerValue;
-      }
-      elseif ($extends == 'Individual' || $extends == 'Contact') {
+      } elseif ($extends == 'Participant') {
         $participantValues['custom_' . $fieldId] = $answerValue;
       }
     }
