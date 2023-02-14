@@ -32,6 +32,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
   public function buildQuickForm() {
     $settings = $this->_settings;
     foreach ($settings as $name => $setting) {
+
       if (isset($setting['quick_form_type'])) {
         switch ($setting['html_type']) {
           case 'Select':
@@ -285,11 +286,12 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
 
   private function _confirmWebhookOnFormLoad() {
     if (!$this->_flagSubmitted) {
+      $organization_id = CRM_Utils_Array::value('eventbrite_api_organization_id', $this->setDefaultValues());
+      $request_path = '/organizations/'. $organization_id .'/webhooks/';
       if ($token = CRM_Utils_Array::value('eventbrite_api_token', $this->setDefaultValues())) {
         try {
           $eb = CRM_Eventbrite_EvenbriteApi::singleton();
-          $result = $eb->request('/webhooks/');
-
+          $result = $eb->request('/organizations/'. $organization_id .'/webhooks/');
           $myListener = CRM_Eventbrite_Utils::getWebhookListenerUrl();
           $countWebhooksExising = $createdWebhooks = 0;
 
@@ -310,7 +312,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
               'endpoint_url' => $myListener,
               'actions' => "attendee.updated",
             );
-            $result = $eb->request('/webhooks/', $body, NULL, 'POST');
+            $result = $eb->request($request_path, $body, NULL, 'POST');
             if ($error = CRM_Utils_Array::value('error', $result)) {
               $error_message = CRM_Utils_Array::value('status_code', $result);
               $error_message .= ': ' . $error;
@@ -326,7 +328,7 @@ class CRM_Eventbrite_Form_Settings extends CRM_Core_Form {
               'endpoint_url' => $myListener,
               'actions' => "order.updated",
             );
-            $result = $eb->request('/webhooks/', $body, NULL, 'POST');
+            $result = $eb->request( $request_path, $body, NULL, 'POST');
             if ($error = CRM_Utils_Array::value('error', $result)) {
               $error_message = CRM_Utils_Array::value('status_code', $result);
               $error_message .= ': ' . $error;
